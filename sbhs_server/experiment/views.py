@@ -16,6 +16,7 @@ def check_connection(req):
 def initiation(req):
     username = req.POST.get("username")
     password = req.POST.get("password")
+    #print password
     user = authenticate(username=username, password=password)
     if user is not None:
         if user.is_active:

@@ -10,7 +10,7 @@ urlpatterns = patterns('',
 
     #url(r'^admin/', include(admin.site.urls)),
     url(r'^/?$', 'sbhs_server.pages.views.index'),
-    url(r'^exam/', include('yaksh.urls')),
+    #url(r'^exam/', include('yaksh.urls')),
     url(r'^about/?$', 'sbhs_server.pages.views.about'),
     url(r'^contact/?$', 'sbhs_server.pages.views.contact'),
     url(r'^info/?$', 'sbhs_server.pages.views.info'),
