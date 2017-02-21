@@ -42,6 +42,7 @@ def initiation(req):
             print "Loc8"
             e = Experiment()
             #e.booking=cur_booking
+            e.user = user
             e.log=os.path.join(logdir, filename)
             e.save()
             print "Loc9"
@@ -69,52 +70,42 @@ def initiation(req):
 @csrf_exempt
 def experiment(req):
     try:
-        server_start_ts = int(time.time() * 1000)
+        #server_start_ts = int(time.time() * 1000)
         from sbhs_server.settings import boards
         user = req.user
-        key = str(user.board.mid)
+        key = str(1)
+		#key = str(user.board.mid)
         experiment = Experiment.objects.select_related().filter(id=boards[key]["experiment_id"])
 
-        if len(experiment) == 1 and user.id == experiment[0].booking.account.id and experiment[0].booking.trashed_at == None:
+        if len(experiment) == 1 and user.id == experiment[0].user.id:
             experiment = experiment[0]
             now = datetime.datetime.now()
-            endtime = experiment.booking.end_time()
-            if endtime > now:
-                timeleft = int((endtime-now).seconds)
-                heat = max(min(int(req.POST.get("heat")), 100), 0)
-                fan = max(min(int(req.POST.get("fan")), 100), 0)
+            #if endtime > now:
+            #    timeleft = int((endtime-now).seconds)
+            heat = max(min(int(req.POST.get("heat")), 100), 0)
+            fan = max(min(int(req.POST.get("fan")), 100), 0)
 
-                boards[key]["board"].setHeat(heat)
-                boards[key]["board"].setFan(fan)
-                temperature = boards[key]["board"].getTemp()
-                log_data(boards[key]["board"], key, heat=heat, fan=fan, temp=temperature)
+            boards[key]["board"].setHeat(heat)
+            boards[key]["board"].setFan(fan)
+            temperature = boards[key]["board"].getTemp()
+            log_data(boards[key]["board"], key, heat=heat, fan=fan, temp=temperature)
 
-                server_end_ts = int(time.time() * 1000)
+            #    server_end_ts = int(time.time() * 1000)
 
-                STATUS = 1
-                MESSAGE = "%s %d %d %2.2f" % (req.POST.get("iteration"),
-                                            heat,
-                                            fan,
-                                            temperature)
-                MESSAGE = "%s %s %d %d,%s,%d" % (MESSAGE,
-                                            req.POST.get("timestamp"),
-                                            server_start_ts,
-                                            server_end_ts,
-                                            req.POST.get("variables"), timeleft)
+            STATUS = 1
+            MESSAGE = "%s %d %d %2.2f" % (req.POST.get("iteration"),
+                                        heat,
+                                        fan,
+                                        temperature)
+            MESSAGE = "%s %s %d %d,%s,%d" % (MESSAGE,
+                                        req.POST.get("timestamp"),
+                                        server_start_ts,
+                                        server_end_ts,
+                                        req.POST.get("variables"), timeleft)
 
-                f = open(experiment.log, "a")
-                f.write(" ".join(MESSAGE.split(",")[:2]) + "\n")
-                f.close()
-            else:
-                boards[key]["board"].setHeat(0)
-                boards[key]["board"].setFan(100)
-                log_data(boards[key]["board"], key)
-                
-                STATUS = 0
-                MESSAGE = "Slot has ended. Please book the next slot to continue the experiment."
-
-                reset(req)
-                boards[key]["experiment_id"] = None
+            f = open(experiment.log, "a")
+            f.write(" ".join(MESSAGE.split(",")[:2]) + "\n")
+            f.close()
         else:
             STATUS = 0
             MESSAGE = "You haven't booked this slot."
@@ -129,18 +120,18 @@ def reset(req):
         from sbhs_server.settings import boards
         user = req.user
         if user.is_authenticated():
-            key = str(user.board.mid)
+            key = str(1)#user.board.mid)
             experiment = Experiment.objects.select_related().filter(id=boards[key]["experiment_id"])
 
-            if len(experiment) == 1 and user == experiment[0].booking.account:
+            if len(experiment) == 1 and user == experiment[0].user:
                 experiment = experiment[0]
                 now = datetime.datetime.now()
-                endtime = experiment.booking.end_time()
+                #endtime = experiment.booking.end_time()
                 boards[key]["board"].setHeat(0)
                 boards[key]["board"].setFan(100)
                 log_data(boards[key]["board"], key)
-                if endtime < now:
-                    boards[key]["experiment_id"] = None
+                #if endtime < now:
+                #    boards[key]["experiment_id"] = None
     except:
         pass
 
@@ -163,8 +154,8 @@ def logs(req):
 @login_required(redirect_field_name=None)
 def download_log(req, experiment_id, fn):
     try:
-        experiment = Experiment.objects.select_related("booking", "booking__account").get(id=experiment_id)
-        assert req.user.id == experiment.booking.account.id
+        experiment = Experiment.objects.select_related().get(id=experiment_id)
+        assert req.user.id == experiment.user.id
         f = open(experiment.log, "r")
         data = f.read()
         f.close()

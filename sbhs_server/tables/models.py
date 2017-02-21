@@ -18,7 +18,7 @@ class Account(TrashableMixin, AbstractBaseUser):
 
     is_active           = models.BooleanField(default=False)
     is_admin            = models.BooleanField(default=False)
-    #board               = models.ForeignKey("Board")
+    #board               = models.ForeignKey("Board") #Removed
 
     created_at          = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at          = models.DateTimeField(auto_now=True, editable=False)
@@ -183,6 +183,7 @@ class Booking(TrashableMixin):
 class Experiment(TrashableMixin):
 
     #booking             = models.ForeignKey("Booking")
+    user                = models.ForeignKey("Account")
 
     log                 = models.CharField(max_length=255)
     checksum            = models.CharField(max_length=255, default="NONE")
