@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as LOGIN
-from sbhs_server.tables.models import Slot, Account, Experiment, Booking
+from sbhs_server.tables.models import Account, Experiment
 import json, datetime, os, time
 from django.views.decorators.csrf import csrf_exempt
 from sbhs_server import settings
@@ -17,37 +17,25 @@ def initiation(req):
     username = req.POST.get("username")
     password = req.POST.get("password")
     user = authenticate(username=username, password=password)
-    print "Loc1"
     if user is not None:
-        if user.is_active:
-            print "Loc2"
-            try:			
-                user1 = Account.objects.select_related().filter(id=user.id)
-            except:
-                print "This is it!"
-            print "Loc3"
+        if user.is_active:			
+            user1 = Account.objects.select_related().filter(id=user.id)
             user1 = user1[0]
-            print "Loc6"
             filename = datetime.datetime.strftime(datetime.datetime.now(), "%Y%b%d_%H_%M_%S.txt")
             logdir = os.path.join(settings.EXPERIMENT_LOGS_DIR, user.username)
             if not os.path.exists(logdir):
-                print "Loc4"
                 os.makedirs(logdir)
-            print "Loc5"
             f = open(os.path.join(logdir, filename), "a")
             f.close()
-            print "Loc7"
+            
 
             LOGIN(req, user)
-            print "Loc8"
             e = Experiment()
-            #e.booking=cur_booking
             e.user = user
             e.log=os.path.join(logdir, filename)
             e.save()
-            print "Loc9"
 
-            key = str(1)#str(user_board.mid)
+            key = str(1)#Temporarily till SBHS class and settings.board dictionary are changed
             try:
                 settings.boards[key]["experiment_id"] = e.id
             except:
@@ -70,18 +58,14 @@ def initiation(req):
 @csrf_exempt
 def experiment(req):
     try:
-        #server_start_ts = int(time.time() * 1000)
         from sbhs_server.settings import boards
         user = req.user
-        key = str(1)
-		#key = str(user.board.mid)
+        key = str(1)#Temporarily till SBHS class and settings.board dictionary are changed
         experiment = Experiment.objects.select_related().filter(id=boards[key]["experiment_id"])
 
         if len(experiment) == 1 and user.id == experiment[0].user.id:
             experiment = experiment[0]
             now = datetime.datetime.now()
-            #if endtime > now:
-            #    timeleft = int((endtime-now).seconds)
             heat = max(min(int(req.POST.get("heat")), 100), 0)
             fan = max(min(int(req.POST.get("fan")), 100), 0)
 
@@ -90,7 +74,6 @@ def experiment(req):
             temperature = boards[key]["board"].getTemp()
             log_data(boards[key]["board"], key, heat=heat, fan=fan, temp=temperature)
 
-            #    server_end_ts = int(time.time() * 1000)
 
             STATUS = 1
             MESSAGE = "%s %d %d %2.2f" % (req.POST.get("iteration"),
@@ -120,18 +103,16 @@ def reset(req):
         from sbhs_server.settings import boards
         user = req.user
         if user.is_authenticated():
-            key = str(1)#user.board.mid)
+            key = str(1) #Temporarily till SBHS class and settings.board dictionary are changed
             experiment = Experiment.objects.select_related().filter(id=boards[key]["experiment_id"])
 
             if len(experiment) == 1 and user == experiment[0].user:
                 experiment = experiment[0]
                 now = datetime.datetime.now()
-                #endtime = experiment.booking.end_time()
                 boards[key]["board"].setHeat(0)
                 boards[key]["board"].setFan(100)
                 log_data(boards[key]["board"], key)
-                #if endtime < now:
-                #    boards[key]["experiment_id"] = None
+                
     except:
         pass
 
@@ -142,11 +123,7 @@ def client_version(req):
 
 @login_required(redirect_field_name=None)
 def logs(req):
-    bookings         = Booking.objects.only("id").filter(account__id=req.user.id)
-    deleted_bookings = Booking.trash.only("id").filter(account__id=req.user.id)
-    bookings = list(bookings) + list(deleted_bookings)
-    booking_ids = [b.id for b in bookings]
-    experiments = Experiment.objects.select_related("booking", "booking__slot").filter(booking_id__in=booking_ids)
+    experiments = Experiment.objects.select_related().filter(user_id=req.user.id)
     for e in experiments:
         e.logname = e.log.split("/")[-1]
     return render(req, "experiment/logs.html", {"experiments": reversed(experiments)})
