@@ -47,8 +47,10 @@ def initiation(req):
             print "Loc9"
 
             key = str(1)#str(user_board.mid)
-			
-            settings.boards[key]["experiment_id"] = e.id
+            try:
+                settings.boards[key]["experiment_id"] = e.id
+            except:
+                print "You found it"
             reset(req)
 			
 

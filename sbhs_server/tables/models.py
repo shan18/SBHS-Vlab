@@ -182,7 +182,7 @@ class Booking(TrashableMixin):
 
 class Experiment(TrashableMixin):
 
-    booking             = models.ForeignKey("Booking")
+    #booking             = models.ForeignKey("Booking")
 
     log                 = models.CharField(max_length=255)
     checksum            = models.CharField(max_length=255, default="NONE")
