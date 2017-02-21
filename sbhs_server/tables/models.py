@@ -8,43 +8,6 @@ from sbhs_server import settings
 #from yaksh.models import Profile
 # Create your models here.
 
-class Board(TrashableMixin):
-
-    mid                 = models.IntegerField(unique=True)
-    online              = models.BooleanField(default=True)
-
-    created_at          = models.DateTimeField(auto_now_add=True, editable=False)
-    updated_at          = models.DateTimeField(auto_now=True, editable=False)
-
-    @staticmethod
-    def can_do_random_allotment():
-        return not os.path.exists(os.path.join(settings.BASE_DIR, "WORKSHOP_MODE"))
-
-    @staticmethod
-    def toggle_random_allotment():
-        if Board.can_do_random_allotment():
-            f = open(os.path.join(settings.BASE_DIR, "WORKSHOP_MODE"), "w")
-            f.close()
-        else:
-            os.remove(os.path.join(settings.BASE_DIR, "WORKSHOP_MODE"))
-
-    @staticmethod
-    def allot_board():
-        if Board.can_do_random_allotment():
-            online_boards_count = len(settings.online_mids)
-            board_num = random.randrange(online_boards_count)
-            return settings.online_mids[board_num]
-        else:
-            last_MID = Account.objects.select_related().order_by("-id")[0].board.mid;
-            online_boards = sorted(settings.online_mids)
-            for o in online_boards:
-                if o > last_MID:
-                    return o
-            return online_boards[0]
-
-    def image_link(self):
-        return settings.WEBCAM_STATIC_DIR + "image" + str(self.mid) + ".jpeg"
-
 
 class Account(TrashableMixin, AbstractBaseUser):
 
@@ -55,7 +18,7 @@ class Account(TrashableMixin, AbstractBaseUser):
 
     is_active           = models.BooleanField(default=False)
     is_admin            = models.BooleanField(default=False)
-    board               = models.ForeignKey("Board")
+    #board               = models.ForeignKey("Board")
 
     created_at          = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at          = models.DateTimeField(auto_now=True, editable=False)

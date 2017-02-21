@@ -64,7 +64,6 @@ def create(req):
                 username=username,
                 email=email,
                 #board_id=Board.allot_board() actual;
-                board_id = 1
             )
     account.set_password(password)
     account.save()

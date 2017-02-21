@@ -16,64 +16,44 @@ def check_connection(req):
 def initiation(req):
     username = req.POST.get("username")
     password = req.POST.get("password")
-    #print password
     user = authenticate(username=username, password=password)
+    print "Loc1"
     if user is not None:
         if user.is_active:
-            user1 = Account.objects.select_related().filter(id=user.id)
+            print "Loc2"
+            try:			
+                user1 = Account.objects.select_related().filter(id=user.id)
+            except:
+                print "This is it!"
+            print "Loc3"
             user1 = user1[0]
-            user_board = user1.board
-            if user_board.online:
-                slots = Slot.slots_now()
-                slot_ids = [s.id for s in slots]
-                now = datetime.datetime.now()
-                bookings = user.booking_set.filter(booking_date__year=now.year,
-                                                booking_date__month=now.month,
-                                                booking_date__day=now.day,
-                                                slot_id__in=slot_ids).select_related("slot")
-                try:
-                    cur_booking = bookings[0]
-                    active_slot = cur_booking.slot
-                except:
-                    cur_booking = None
-                    active_slot = None
+            print "Loc6"
+            filename = datetime.datetime.strftime(datetime.datetime.now(), "%Y%b%d_%H_%M_%S.txt")
+            logdir = os.path.join(settings.EXPERIMENT_LOGS_DIR, user.username)
+            if not os.path.exists(logdir):
+                print "Loc4"
+                os.makedirs(logdir)
+            print "Loc5"
+            f = open(os.path.join(logdir, filename), "a")
+            f.close()
+            print "Loc7"
 
-                if active_slot is not None:
-                    endtime = cur_booking.end_time()
-                    if now < endtime:
-                        filename = datetime.datetime.strftime(now, "%Y%b%d_%H_%M_%S.txt")
-                        logdir = os.path.join(settings.EXPERIMENT_LOGS_DIR, user.username)
-                        if not os.path.exists(logdir):
-                            os.makedirs(logdir)
+            LOGIN(req, user)
+            print "Loc8"
+            e = Experiment()
+            #e.booking=cur_booking
+            e.log=os.path.join(logdir, filename)
+            e.save()
+            print "Loc9"
 
-                        f = open(os.path.join(logdir, filename), "a")
-                        f.close()
-
-                        LOGIN(req, user)
-
-                        e = Experiment()
-                        e.booking=cur_booking
-                        e.log=os.path.join(logdir, filename)
-                        e.save()
-
-                        key = str(user_board.mid)
+            key = str(1)#str(user_board.mid)
 			
-                        settings.boards[key]["experiment_id"] = e.id
-                        reset(req)
+            settings.boards[key]["experiment_id"] = e.id
+            reset(req)
 			
 
-                        STATUS = 1
-                        MESSAGE = filename
-                    else:
-                        reset(req)
-                        STATUS = 0
-                        MESSAGE = "Slot has ended. Please book the next slot to continue the experiment."
-                else:
-                    STATUS = 0
-                    MESSAGE = "You haven't booked this slot."
-            else:
-                STATUS = 0
-                MESSAGE = "Your SBHS is offline. Please contact the Vlabs team."
+            STATUS = 1
+            MESSAGE = filename
         else:
             STATUS = 0
             MESSAGE = "Your account is not activated yet. Please check your email for activation link."
