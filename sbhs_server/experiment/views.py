@@ -35,12 +35,12 @@ def initiation(req):
             e.log=os.path.join(logdir, filename)
             e.save()
 
-            key = str(1)#Temporarily till SBHS class and settings.board dictionary are changed
-            try:
-                settings.boards[key]["experiment_id"] = e.id
-            except:
-                print "You found it"
-            reset(req)
+            #key = str(1)#Temporarily till SBHS class and settings.board dictionary are changed
+            #try:
+            #    settings.boards[key]["experiment_id"] = e.id
+            #except:
+            #    print "You found it"
+            #reset(req)
 			
 
             STATUS = 1
@@ -58,36 +58,54 @@ def initiation(req):
 @csrf_exempt
 def experiment(req):
     try:
+        server_start_ts = int(time.time() * 1000)
         from sbhs_server.settings import boards
         user = req.user
-        key = str(1)#Temporarily till SBHS class and settings.board dictionary are changed
-        experiment = Experiment.objects.select_related().filter(id=boards[key]["experiment_id"])
-
-        if len(experiment) == 1 and user.id == experiment[0].user.id:
+        print "Loc1"
+        #key = str(1)#Temporarily till SBHS class and settings.board dictionary are changed
+        #experiment = Experiment.objects.select_related().filter(id=boards[key]["experiment_id"])
+        experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
+        print "Loc2"
+        if True:#user.id == experiment[0].user.id:
             experiment = experiment[0]
+            print "Loc3"
             now = datetime.datetime.now()
+            print "Loc4"
             heat = max(min(int(req.POST.get("heat")), 100), 0)
+            print "Loc5"
             fan = max(min(int(req.POST.get("fan")), 100), 0)
-
-            boards[key]["board"].setHeat(heat)
-            boards[key]["board"].setFan(fan)
-            temperature = boards[key]["board"].getTemp()
-            log_data(boards[key]["board"], key, heat=heat, fan=fan, temp=temperature)
-
-
+            print "Loc6"
+            #boards[key]["board"].setHeat(heat)
+            boards.setHeat(heat)
+            print "Loc7"
+            #boards[key]["board"].setFan(fan)
+            boards.setFan(fan)
+            print "Loc8"
+            #temperature = boards[key]["board"].getTemp()
+            temperature = boards.getTemp()
+            print temperature
+            print "Loc9"
+            #log_data(boards[key]["board"], key, heat=heat, fan=fan, temp=temperature)
+            log_data(boards, 1, heat=heat, fan=fan, temp=temperature)
+            print "Loc10"
+            server_end_ts = int(time.time() * 1000)
+            timeleft = 0 #TEMPORARY
             STATUS = 1
             MESSAGE = "%s %d %d %2.2f" % (req.POST.get("iteration"),
                                         heat,
                                         fan,
                                         temperature)
+            print "Loc11"
             MESSAGE = "%s %s %d %d,%s,%d" % (MESSAGE,
                                         req.POST.get("timestamp"),
                                         server_start_ts,
                                         server_end_ts,
                                         req.POST.get("variables"), timeleft)
-
+            print "Loc12"
             f = open(experiment.log, "a")
+            print "Loc13"
             f.write(" ".join(MESSAGE.split(",")[:2]) + "\n")
+            print "Loc14"
             f.close()
         else:
             STATUS = 0

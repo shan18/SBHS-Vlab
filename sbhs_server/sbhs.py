@@ -25,6 +25,8 @@ class Sbhs:
         self.device_num = 26 
         self.boardcon = False
         self.status = 0
+        self.heat = 0
+        self.fan = 0
 
     def connect(self, machine_id):
         """ Open a serial connection via USB to the SBHS using the machine id """
@@ -110,40 +112,20 @@ class Sbhs:
             print 'Error: heat value cannot be more than %d' % MAX_HEAT
             return False
 
-        try:
-            self._write(chr(INCOMING_HEAT))
-            self._write(chr(val))
-            return True
-        except:
-            print 'Error: cannot set heat for machine id %d' % self.machine_id
-            self.log('cannot set heat for machine id %d' % self.machine_id, 'ERROR')
-            return False
+        self.heat = val
+        return True
 
     def setFan(self, val):
         """ Set the fan """
         if val > MAX_FAN or val < 0:
             print 'Error: fan value cannot be more than %d' % MAX_FAN
             return False
-        try:
-            self._write(chr(INCOMING_FAN))
-            self._write(chr(val))
-            return True
-        except:
-            print 'Error: cannot set fan for machine id %d' % self.machine_id
-            self.log('cannot set fan for machine id %d' % self.machine_id, 'ERROR')
-            return False
+        self.fan = val
+        return True
 
     def getTemp(self):
         """ Get the temperature """
-        try:
-            self.boardcon.flushInput()
-            self._write(chr(OUTGOING_TEMP))
-            temp = ord(self._read(1)) + (0.1 * ord(self._read(1)))
-            return temp
-        except:
-            print 'Error: cannot read temperature from machine id %d' % self.machine_id
-            self.log('cannot read temperature from machine id %d' % self.machine_id, 'ERROR')
-        return  0.0
+        return self.heat + self.fan
 
     def getMachineId(self):
         """ Get machine id from the device """
