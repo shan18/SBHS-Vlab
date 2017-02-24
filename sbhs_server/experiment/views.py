@@ -61,33 +61,33 @@ def experiment(req):
         server_start_ts = int(time.time() * 1000)
         from sbhs_server.settings import boards
         user = req.user
-        print "Loc1"
+        #print "Loc1"
         #key = str(1)#Temporarily till SBHS class and settings.board dictionary are changed
         #experiment = Experiment.objects.select_related().filter(id=boards[key]["experiment_id"])
         experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
-        print "Loc2"
+        #print "Loc2"
         if True:#user.id == experiment[0].user.id:
             experiment = experiment[0]
-            print "Loc3"
+            #print "Loc3"
             now = datetime.datetime.now()
-            print "Loc4"
+            #print "Loc4"
             heat = max(min(int(req.POST.get("heat")), 100), 0)
-            print "Loc5"
+            #print "Loc5"
             fan = max(min(int(req.POST.get("fan")), 100), 0)
-            print "Loc6"
+            #print "Loc6"
             #boards[key]["board"].setHeat(heat)
             boards.setHeat(heat)
-            print "Loc7"
+            #print "Loc7"
             #boards[key]["board"].setFan(fan)
             boards.setFan(fan)
-            print "Loc8"
+            #print "Loc8"
             #temperature = boards[key]["board"].getTemp()
             temperature = boards.getTemp()
-            print temperature
-            print "Loc9"
+            #print temperature
+            #print "Loc9"
             #log_data(boards[key]["board"], key, heat=heat, fan=fan, temp=temperature)
             log_data(boards, 1, heat=heat, fan=fan, temp=temperature)
-            print "Loc10"
+            #print "Loc10"
             server_end_ts = int(time.time() * 1000)
             timeleft = 0 #TEMPORARY
             STATUS = 1
@@ -127,9 +127,9 @@ def reset(req):
             if len(experiment) == 1 and user == experiment[0].user:
                 experiment = experiment[0]
                 now = datetime.datetime.now()
-                boards[key]["board"].setHeat(0)
-                boards[key]["board"].setFan(100)
-                log_data(boards[key]["board"], key)
+                boards.setHeat(0)
+                boards.setFan(100)
+                log_data(boards, key)
                 
     except:
         pass
@@ -149,15 +149,16 @@ def logs(req):
 @login_required(redirect_field_name=None)
 def download_log(req, experiment_id, fn):
     try:
-        experiment = Experiment.objects.select_related().get(id=experiment_id)
-        assert req.user.id == experiment.user.id
-        f = open(experiment.log, "r")
+        experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
+        #assert req.user.id == experiment.user.id
+        f = open(experiment[0].log, "r")
         data = f.read()
         f.close()
         return HttpResponse(data, content_type='text/text')
     except:
         return HttpResponse("Requested log file doesn't exist.")
-
+		
+#------------------Changes required----------------------------
 def log_data(sbhs, mid, heat=None, fan=None, temp=None):
     f = open(settings.SBHS_GLOBAL_LOG_DIR + "/" + str(mid) + ".log", "a")
     if heat is None:

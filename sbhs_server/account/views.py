@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from sbhs_server.tables.models import Account, Board
+from sbhs_server.tables.models import Account
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib import messages
