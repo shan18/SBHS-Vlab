@@ -217,27 +217,4 @@ else:
 SBHS_GLOBAL_LOG_DIR = os.path.join(BASE_DIR, 'log')
 
 from sbhs_server import sbhs
-boards = sbhs.Sbhs()#{}
-#with open(os.path.join(BASE_DIR, 'map_machine_ids.txt')) as f:
-#    for line in f:
-#        try:
-#            data = line.split("=")
-#            brd = sbhs.Sbhs()
-#            b = brd.connect(int(data[0]))
-#            assert b == True
-#            key = int(brd.getMachineId())          	   
-#            assert key > 0
-#            brd.reset_board()
-#            boards[str(key)] = {"board": brd, "experiment_id": None}
-#        except:
-#            print "Problem"
-#            pass
-
-#online_mids = [int(i) for i in boards.keys()]
-
-#import sys
-#print >>sys.stderr, online_mids[1:33] #srikant
-#srikant
-#f = open('/tmp/online_mids', 'w')
-#f.write(online_mids)
-#f.close()
+boards = sbhs.Sbhs()
