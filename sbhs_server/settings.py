@@ -59,9 +59,9 @@ INSTALLED_APPS = (
     'sbhs_server.experiment',
     'sbhs_server.pages',
     'sbhs_server.password',
-    'sbhs_server.slot',
+    #'sbhs_server.slot',
     'sbhs_server.tables',
-    'sbhs_server.webcam',
+    #'sbhs_server.webcam',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -203,8 +203,8 @@ else:
     }
 
 EXPERIMENT_LOGS_DIR = os.path.join(BASE_DIR, 'experiments')
-WEBCAM_DIR = os.path.join(STATIC_ROOT, 'img/webcam/') if is_production else os.path.join(BASE_DIR, 'static/img/webcam/')
-WEBCAM_STATIC_DIR = 'img/webcam/'
+#WEBCAM_DIR = os.path.join(STATIC_ROOT, 'img/webcam/') if is_production else os.path.join(BASE_DIR, 'static/img/webcam/')
+#WEBCAM_STATIC_DIR = 'img/webcam/'
 
 if not is_production:
     SBHS_ADMINS = (
