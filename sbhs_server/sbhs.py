@@ -37,6 +37,12 @@ class Sbhs:
     def getTemp(self):
         """ Get the temperature """
         return self.heat + self.fan
+	
+	def getHeat(self):
+		return self.heat
+	
+	def getFan(self):
+		return self.fan
 
     def reset_board(self):
         self.setFan(100)

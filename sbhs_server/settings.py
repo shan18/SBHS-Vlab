@@ -59,9 +59,7 @@ INSTALLED_APPS = (
     'sbhs_server.experiment',
     'sbhs_server.pages',
     'sbhs_server.password',
-    #'sbhs_server.slot',
     'sbhs_server.tables',
-    #'sbhs_server.webcam',
 )
 
 MIDDLEWARE_CLASSES = (

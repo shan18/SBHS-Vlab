@@ -58,22 +58,16 @@ def create(req):
         messages.add_message(req, messages.ERROR, "<br>".join(error))
         return redirect(index)
 
-    # try:
     account = Account(
                 name=name,
                 username=username,
                 email=email,
-                #board_id=Board.allot_board() actual;
             )
     account.set_password(password)
     account.save()
-    #account.send_confirmation()
-    print "Done"
+    account.send_confirmation()
     messages.add_message(req, messages.SUCCESS, "You have been registered successfully. Please check your email for confirmation.")
     return redirect(index)
-    # except:
-    #     messages.add_message(req, messages.ERROR, "Invalid information. Please try again.")
-    #     return redirect(index)
 
 def confirm(req, token):
     try:

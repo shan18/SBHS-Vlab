@@ -5,7 +5,6 @@ import random, datetime, os
 from sbhs_server.helpers import mailer, simple_encrypt
 from django.contrib.auth.models import UserManager
 from sbhs_server import settings
-from sbhs_server.sbhs import Sbhs
 #from yaksh.models import Profile
 # Create your models here.
 
@@ -19,7 +18,6 @@ class Account(TrashableMixin, AbstractBaseUser):
 
     is_active           = models.BooleanField(default=False)
     is_admin            = models.BooleanField(default=False)
-    board               = Sbhs()
 
     created_at          = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at          = models.DateTimeField(auto_now=True, editable=False)

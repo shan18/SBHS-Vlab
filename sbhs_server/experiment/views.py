@@ -6,14 +6,17 @@ from django.contrib.auth import login as LOGIN
 from sbhs_server.tables.models import Account, Experiment
 import json, datetime, os, time
 from django.views.decorators.csrf import csrf_exempt
-from sbhs_server import settings
+from sbhs_server import settings,sbhs
 # Create your views here.
 # 
+
+global boards
 def check_connection(req):
     return HttpResponse("TESTOK")
 
 @csrf_exempt
 def initiation(req):
+    global boards
     username = req.POST.get("username")
     password = req.POST.get("password")
     user = authenticate(username=username, password=password)
@@ -34,13 +37,9 @@ def initiation(req):
             e.user = user
             e.log=os.path.join(logdir, filename)
             e.save()
+            boards = sbhs.Sbhs()
 
-            #key = str(1)#Temporarily till SBHS class and settings.board dictionary are changed
-            #try:
-            #    settings.boards[key]["experiment_id"] = e.id
-            #except:
-            #    print "You found it"
-            #reset(req)
+            
 			
 
             STATUS = 1
@@ -59,31 +58,30 @@ def initiation(req):
 def experiment(req):
     try:
         server_start_ts = int(time.time() * 1000)
-        #from sbhs_server.settings import boards
+        
         user = req.user
-		boards = req.user.board
-        #print "Loc1"
+        global boards
+        
         experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
-        #print "Loc2"
+        
         
         experiment = experiment[0]
-        #print "Loc3"
+        
         now = datetime.datetime.now()
-        #print "Loc4"
+        
         heat = max(min(int(req.POST.get("heat")), 100), 0)
-        #print "Loc5"
+        
         fan = max(min(int(req.POST.get("fan")), 100), 0)
-        #print "Loc6"
+        
         
         boards.setHeat(heat)
-        #print "Loc7"
+        
         boards.setFan(fan)
-        #print "Loc8"
+        
         temperature = boards.getTemp()
-        #print temperature
-        #print "Loc9"
+        
         log_data(boards, 1, heat=heat, fan=fan, temp=temperature)
-        #print "Loc10"
+        
         server_end_ts = int(time.time() * 1000)
         timeleft = 0 #TEMPORARY
         STATUS = 1
@@ -91,17 +89,17 @@ def experiment(req):
                                     heat,
                                     fan,
                                     temperature)
-        print "Loc11"
+        
         MESSAGE = "%s %s %d %d,%s,%d" % (MESSAGE,
                                     req.POST.get("timestamp"),
                                     server_start_ts,
                                     server_end_ts,
                                     req.POST.get("variables"), timeleft)
-        print "Loc12"
+        
         f = open(experiment.log, "a")
-        print "Loc13"
+        
         f.write(" ".join(MESSAGE.split(",")[:2]) + "\n")
-        print "Loc14"
+        
         f.close()
         return HttpResponse(json.dumps({"STATUS": STATUS, "MESSAGE": MESSAGE}))
     except Exception:
@@ -110,18 +108,16 @@ def experiment(req):
 @csrf_exempt
 def reset(req):
     try:
-        from sbhs_server.settings import boards
         user = req.user
         if user.is_authenticated():
-            key = str(1) #Temporarily till SBHS class and settings.board dictionary are changed
-            experiment = Experiment.objects.select_related().filter(id=boards[key]["experiment_id"])
+			
+            experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
 
-            if len(experiment) == 1 and user == experiment[0].user:
-                experiment = experiment[0]
-                now = datetime.datetime.now()
-                boards.setHeat(0)
-                boards.setFan(100)
-                log_data(boards, key)
+            experiment = experiment[0]
+            now = datetime.datetime.now()
+            #boards.setHeat(0)
+            #boards.setFan(100)
+            log_data(boards, key)
                 
     except:
         pass
