@@ -216,5 +216,5 @@ else:
 
 SBHS_GLOBAL_LOG_DIR = os.path.join(BASE_DIR, 'log')
 
-from sbhs_server import sbhs
-boards = sbhs.Sbhs()
+#from sbhs_server import sbhs
+#boards = sbhs.Sbhs()

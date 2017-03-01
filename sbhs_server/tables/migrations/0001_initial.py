@@ -24,36 +24,11 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'tables', ['Account'])
 
-        # Adding model 'Slot'
-        db.create_table(u'tables_slot', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('trashed_at', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('start_hour', self.gf('django.db.models.fields.IntegerField')()),
-            ('start_minute', self.gf('django.db.models.fields.IntegerField')()),
-            ('end_hour', self.gf('django.db.models.fields.IntegerField')()),
-            ('end_minute', self.gf('django.db.models.fields.IntegerField')()),
-            ('created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('updated_at', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-        ))
-        db.send_create_signal(u'tables', ['Slot'])
-
-        # Adding model 'Booking'
-        db.create_table(u'tables_booking', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('trashed_at', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('account', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['tables.Account'])),
-            ('slot', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['tables.Slot'])),
-            ('booking_date', self.gf('django.db.models.fields.DateTimeField')()),
-            ('created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('updated_at', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-        ))
-        db.send_create_signal(u'tables', ['Booking'])
-
         # Adding model 'Experiment'
         db.create_table(u'tables_experiment', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('trashed_at', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('booking', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['tables.Booking'])),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['tables.Account'])),
             ('log', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('checksum', self.gf('django.db.models.fields.CharField')(default='NONE', max_length=255)),
             ('created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
@@ -65,12 +40,6 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Deleting model 'Account'
         db.delete_table(u'tables_account')
-
-        # Deleting model 'Slot'
-        db.delete_table(u'tables_slot')
-
-        # Deleting model 'Booking'
-        db.delete_table(u'tables_booking')
 
         # Deleting model 'Experiment'
         db.delete_table(u'tables_experiment')
@@ -91,36 +60,15 @@ class Migration(SchemaMigration):
             'updated_at': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '127'})
         },
-        u'tables.booking': {
-            'Meta': {'object_name': 'Booking'},
-            'account': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['tables.Account']"}),
-            'booking_date': ('django.db.models.fields.DateTimeField', [], {}),
-            'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'slot': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['tables.Slot']"}),
-            'trashed_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'updated_at': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'})
-        },
         u'tables.experiment': {
             'Meta': {'object_name': 'Experiment'},
-            'booking': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['tables.Booking']"}),
             'checksum': ('django.db.models.fields.CharField', [], {'default': "'NONE'", 'max_length': '255'}),
             'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'log': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'trashed_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'updated_at': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'})
-        },
-        u'tables.slot': {
-            'Meta': {'object_name': 'Slot'},
-            'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'end_hour': ('django.db.models.fields.IntegerField', [], {}),
-            'end_minute': ('django.db.models.fields.IntegerField', [], {}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'start_hour': ('django.db.models.fields.IntegerField', [], {}),
-            'start_minute': ('django.db.models.fields.IntegerField', [], {}),
-            'trashed_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'updated_at': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'})
+            'updated_at': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['tables.Account']"})
         }
     }
 

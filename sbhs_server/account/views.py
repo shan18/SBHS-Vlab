@@ -67,7 +67,7 @@ def create(req):
             )
     account.set_password(password)
     account.save()
-    account.send_confirmation()
+    #account.send_confirmation()
     print "Done"
     messages.add_message(req, messages.SUCCESS, "You have been registered successfully. Please check your email for confirmation.")
     return redirect(index)

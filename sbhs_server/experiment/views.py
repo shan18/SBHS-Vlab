@@ -59,8 +59,9 @@ def initiation(req):
 def experiment(req):
     try:
         server_start_ts = int(time.time() * 1000)
-        from sbhs_server.settings import boards
+        #from sbhs_server.settings import boards
         user = req.user
+		boards = req.user.board
         #print "Loc1"
         experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
         #print "Loc2"
