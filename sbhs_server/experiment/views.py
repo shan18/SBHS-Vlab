@@ -3,10 +3,15 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as LOGIN
-from sbhs_server.tables.models import Account, Experiment
-import json, datetime, os, time
+from sbhs_server.tables.models import Account
+from sbhs_server.tables.models import Experiment
+import json
+import datetime
+import os
+import time
 from django.views.decorators.csrf import csrf_exempt
-from sbhs_server import settings,sbhs
+from sbhs_server import settings
+from sbhs_server import sbhs
 # Create your views here.
 # 
 
@@ -52,8 +57,7 @@ def initiation(req):
         MESSAGE = "Invalid username or password"
 
     return HttpResponse(json.dumps({"STATUS": STATUS, "MESSAGE": MESSAGE}))
-#    return HttpResponse(key)
-# @login_required(redirect_field_name=None)
+
 @csrf_exempt
 def experiment(req):
     try:
@@ -115,8 +119,6 @@ def reset(req):
 
             experiment = experiment[0]
             now = datetime.datetime.now()
-            #boards.setHeat(0)
-            #boards.setFan(100)
             log_data(boards, key)
                 
     except:

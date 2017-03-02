@@ -201,8 +201,6 @@ else:
     }
 
 EXPERIMENT_LOGS_DIR = os.path.join(BASE_DIR, 'experiments')
-#WEBCAM_DIR = os.path.join(STATIC_ROOT, 'img/webcam/') if is_production else os.path.join(BASE_DIR, 'static/img/webcam/')
-#WEBCAM_STATIC_DIR = 'img/webcam/'
 
 if not is_production:
     SBHS_ADMINS = (
@@ -213,6 +211,3 @@ else:
     from sbhs_server.sbhs_admin_config import SBHS_ADMINS
 
 SBHS_GLOBAL_LOG_DIR = os.path.join(BASE_DIR, 'log')
-
-#from sbhs_server import sbhs
-#boards = sbhs.Sbhs()

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.template.loader import render_to_string
-from django.http import HttpResponseNotFound, HttpResponseServerError
+from django.http import HttpResponseNotFound
+from django.http import HttpResponseServerError
 
 # Create your views here.
 

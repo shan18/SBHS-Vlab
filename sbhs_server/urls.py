@@ -1,4 +1,6 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import patterns
+from django.conf.urls import include
+from django.conf.urls import url
 
 # from django.contrib import admin
 # admin.autodiscover()
@@ -47,7 +49,6 @@ urlpatterns = patterns('',
     url(r'^experiment/logs/([0-9]+)/(.+)?$', 'sbhs_server.experiment.views.download_log'),
 
 
-    #url(r'^admin/?$', 'sbhs_server.admin.views.index'),
     url(r'^admin/profile/([0-9]+)/?$', 'sbhs_server.admin.views.profile'),
     url(r'^admin/validate_log_file/?$', 'sbhs_server.experiment.views.validate_log_file'),
 )

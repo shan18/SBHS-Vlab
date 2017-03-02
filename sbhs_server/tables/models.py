@@ -1,8 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from undelete.models import TrashableMixin
-import random, datetime, os
-from sbhs_server.helpers import mailer, simple_encrypt
+import random
+import datetime
+import os
+from sbhs_server.helpers import mailer
+from sbhs_server.helpers import simple_encrypt
 from django.contrib.auth.models import UserManager
 from sbhs_server import settings
 #from yaksh.models import Profile
@@ -55,7 +58,6 @@ class Account(TrashableMixin, AbstractBaseUser):
 
 class Experiment(TrashableMixin):
 
-    #booking             = models.ForeignKey("Booking")
     user                = models.ForeignKey("Account")
 
     log                 = models.CharField(max_length=255)
