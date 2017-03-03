@@ -37,7 +37,7 @@ class Sbhs:
 
     def getTemp(self):
         """ Get the temperature """
-        return self.heat + self.fan
+        return self.heat * self.fan
 	
 	def getHeat(self):
 		return self.heat
