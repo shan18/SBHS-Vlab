@@ -6,6 +6,7 @@ from time import sleep
 from time import time
 from datetime import datetime
 import random
+#The following line is needed to import Formula
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from sbhs_formula.formula import Formula
 #LOG_FILE = '../log/sbhserr.log'
@@ -57,6 +58,10 @@ class Sbhs:
     def reset_board(self):
         self.setFan(100)
         self.setHeat(0)
+
+    def getID(self):
+        """ Returns the Coefficient ID """
+        return self.formula.i
 
     def log(self, msg, level):
         try:
