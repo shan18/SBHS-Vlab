@@ -87,14 +87,14 @@ def experiment(req):
         log_data(boards, 1, heat=heat, fan=fan, temp=temperature)
         
         server_end_ts = int(time.time() * 1000)
-        timeleft = "NA" #TEMPORARY
+        timeleft = float('inf')
         STATUS = 1
         MESSAGE = "%s %d %d %2.2f" % (req.POST.get("iteration"),
                                     heat,
                                     fan,
                                     temperature)
         
-        MESSAGE = "%s %s %d %d,%s,%s" % (MESSAGE,
+        MESSAGE = "%s %s %d %d,%s,%f" % (MESSAGE,
                                     req.POST.get("timestamp"),
                                     server_start_ts,
                                     server_end_ts,
