@@ -133,7 +133,7 @@ def client_version(req):
 def logs(req):
     experiments = Experiment.objects.select_related().filter(user_id=req.user.id)
     for e in experiments:
-        e.logname = e.log.split("/")[-1]
+        e.logname = e.log.split("\\")[-1]
     return render(req, "experiment/logs.html", {"experiments": reversed(experiments)})
 
 @login_required(redirect_field_name=None)
