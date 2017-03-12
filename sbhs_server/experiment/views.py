@@ -40,10 +40,10 @@ def initiation(req):
             e = Experiment()
             e.user = user
             e.log=os.path.join(logdir, filename)
-            e.save()
             boards = sbhs.Sbhs()
-
             global boards
+
+            e.coeff_ID = boards.getID()
 			
 
             STATUS = 1
@@ -84,7 +84,7 @@ def experiment(req):
         
         temperature = boards.getTemp()
         
-        log_data(boards, 1, heat=heat, fan=fan, temp=temperature)
+        log_data(boards, boards.getID(), heat=heat, fan=fan, temp=temperature)
         
         server_end_ts = int(time.time() * 1000)
         timeleft = 5999
@@ -119,7 +119,7 @@ def reset(req):
 
             experiment = experiment[0]
             now = datetime.datetime.now()
-            log_data(boards, key)
+            log_data(boards, experiment.coeff_ID)
                 
     except:
         pass
@@ -147,9 +147,8 @@ def download_log(req, experiment_id, fn):
     except:
         return HttpResponse("Requested log file doesn't exist.")
 		
-#------------------Changes required----------------------------
-def log_data(sbhs, mid, heat=None, fan=None, temp=None):
-    f = open(settings.SBHS_GLOBAL_LOG_DIR + "/" + str(mid) + ".log", "a")
+def log_data(sbhs, coeff_id, heat=None, fan=None, temp=None):
+    f = open(settings.SBHS_GLOBAL_LOG_DIR + "/" + str(coeff_id) + ".log", "a")
     if heat is None:
         heat = sbhs.getHeat()
     if fan is None:
