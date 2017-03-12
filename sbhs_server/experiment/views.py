@@ -139,8 +139,7 @@ def logs(req):
 @login_required(redirect_field_name=None)
 def download_log(req, experiment_id, fn):
     try:
-        experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
-        #assert req.user.id == experiment.user.id
+        experiment = Experiment.objects.select_related().filter(user_id=req.user.id,id=experiment_id)
         f = open(experiment[0].log, "r")
         data = f.read()
         f.close()
