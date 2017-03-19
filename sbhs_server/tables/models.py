@@ -4,6 +4,7 @@ from undelete.models import TrashableMixin
 import random
 import datetime
 import os
+import sys
 from sbhs_server.helpers import mailer
 from sbhs_server.helpers import simple_encrypt
 from django.contrib.auth.models import UserManager
@@ -21,6 +22,8 @@ class Account(TrashableMixin, AbstractBaseUser):
 
     is_active           = models.BooleanField(default=False)
     is_admin            = models.BooleanField(default=False)
+
+    coeff_ID              = models.IntegerField(default=0)
 
     created_at          = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at          = models.DateTimeField(auto_now=True, editable=False)
@@ -62,7 +65,7 @@ class Experiment(TrashableMixin):
 
     log                 = models.CharField(max_length=255)
     checksum            = models.CharField(max_length=255, default="NONE")
-    coeff_ID            = models.IntegerField(default=0)
+    #coeff_ID            = models.IntegerField(default=0)
 
     created_at          = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at          = models.DateTimeField(auto_now=True, editable=False)

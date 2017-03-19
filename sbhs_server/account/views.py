@@ -8,6 +8,11 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as LOGIN
 from django.contrib.auth import logout as LOGOUT
 from django.contrib.auth.decorators import login_required
+import random
+import sys
+#The following line is needed to import Formula
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from sbhs_formula.formula import Formula
 # Create your views here.
 
 def index(req):
@@ -30,6 +35,7 @@ def create(req):
     institute   = req.POST.get("institute").strip()
     department  = req.POST.get("department").strip()
     position    = req.POST.get("position").strip()
+    coeff_ID    = random.randint(0,Formula.countCoeff()-1)
 
     error = error + (["Please enter a name."] if name == "" else [])
     error = error + (["Please enter an email."] if email == "" else [])
@@ -62,6 +68,7 @@ def create(req):
                 name=name,
                 username=username,
                 email=email,
+                coeff_ID=coeff_ID
             )
     account.set_password(password)
     account.save()

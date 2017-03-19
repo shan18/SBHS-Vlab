@@ -40,10 +40,10 @@ def initiation(req):
             e = Experiment()
             e.user = user
             e.log=os.path.join(logdir, filename)
-            boards = sbhs.Sbhs()
+            boards = sbhs.Sbhs(user.coeff_ID)
             global boards
 
-            e.coeff_ID = boards.getID()
+            #e.coeff_ID = boards.getID()
 			
 
             STATUS = 1
@@ -84,7 +84,7 @@ def experiment(req):
         
         temperature = boards.getTemp()
         
-        log_data(boards, boards.getID(), heat=heat, fan=fan, temp=temperature)
+        log_data(boards, user.coeff_ID, heat=heat, fan=fan, temp=temperature)
         
         server_end_ts = int(time.time() * 1000)
         timeleft = 5999

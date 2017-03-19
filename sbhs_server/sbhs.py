@@ -20,13 +20,13 @@ class Sbhs:
 	
     """ self.temp signifies the previous temperature measurement.It is intially set randomly"""
 
-    def __init__(self):
+    def __init__(self,coeff_ID):
         # status of the board
         self.status = 0
         self.heat = 0
         self.fan = 0
         self.temp = random.uniform(25.0,27.0)
-        self.formula = Formula()
+        self.formula = Formula(coeff_ID)
         
     def setHeat(self, val):
         """ Set the heat """
@@ -59,9 +59,7 @@ class Sbhs:
         self.setFan(100)
         self.setHeat(0)
 
-    def getID(self):
-        """ Returns the Coefficient ID """
-        return self.formula.i
+    
 
     def log(self, msg, level):
         try:
