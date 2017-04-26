@@ -1,0 +1,5 @@
+*.pyc
+experiments/
+log/
+*.sqlite3
+migrations/

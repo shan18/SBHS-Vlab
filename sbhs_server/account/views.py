@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from sbhs_server.tables.models import Account, Board
+from sbhs_server.tables.models import Account
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib import messages
@@ -8,6 +8,11 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as LOGIN
 from django.contrib.auth import logout as LOGOUT
 from django.contrib.auth.decorators import login_required
+import random
+import sys
+#The following line is needed to import Formula
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from sbhs_formula.formula import Formula
 # Create your views here.
 
 def index(req):
@@ -30,6 +35,7 @@ def create(req):
     institute   = req.POST.get("institute").strip()
     department  = req.POST.get("department").strip()
     position    = req.POST.get("position").strip()
+    coeff_ID    = random.randint(0,Formula.countCoeff()-1)
 
     error = error + (["Please enter a name."] if name == "" else [])
     error = error + (["Please enter an email."] if email == "" else [])
@@ -58,23 +64,17 @@ def create(req):
         messages.add_message(req, messages.ERROR, "<br>".join(error))
         return redirect(index)
 
-    # try:
     account = Account(
                 name=name,
                 username=username,
                 email=email,
-                #board_id=Board.allot_board() actual;
-                board_id = 1
+                coeff_ID=coeff_ID
             )
     account.set_password(password)
     account.save()
     account.send_confirmation()
-    print "Done"
     messages.add_message(req, messages.SUCCESS, "You have been registered successfully. Please check your email for confirmation.")
     return redirect(index)
-    # except:
-    #     messages.add_message(req, messages.ERROR, "Invalid information. Please try again.")
-    #     return redirect(index)
 
 def confirm(req, token):
     try:
