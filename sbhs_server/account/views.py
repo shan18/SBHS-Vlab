@@ -10,6 +10,7 @@ from django.contrib.auth import logout as LOGOUT
 from django.contrib.auth.decorators import login_required
 import random
 import sys
+import os
 #The following line is needed to import Formula
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from sbhs_formula.formula import Formula
