@@ -3,21 +3,22 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as LOGIN
-from sbhs_server.tables.models import Account
-from sbhs_server.tables.models import Experiment
+from django.views.decorators.csrf import csrf_exempt
+
 import json
 import datetime
 import os
 import time
-from django.views.decorators.csrf import csrf_exempt
+
+from sbhs_server.tables.models import Account
+from sbhs_server.tables.models import Experiment
 from sbhs_server import settings
 from sbhs_server import sbhs
-# Create your views here.
-# 
 
 
 def check_connection(req):
     return HttpResponse("TESTOK")
+
 
 @csrf_exempt
 def initiation(req):
@@ -34,7 +35,6 @@ def initiation(req):
                 os.makedirs(logdir)
             f = open(os.path.join(logdir, filename), "a")
             f.close()
-            
 
             LOGIN(req, user)
             e = Experiment()
@@ -43,8 +43,7 @@ def initiation(req):
             boards = sbhs.Sbhs(user.coeff_ID)
             global boards
 
-            #e.coeff_ID = boards.getID()
-			
+            # e.coeff_ID = boards.getID()
 
             STATUS = 1
             MESSAGE = filename
@@ -57,18 +56,17 @@ def initiation(req):
 
     return HttpResponse(json.dumps({"STATUS": STATUS, "MESSAGE": MESSAGE}))
 
+
 @csrf_exempt
 def experiment(req):
-    #global boards
+    # global boards
     try:
         server_start_ts = int(time.time() * 1000)
         
         user = req.user
         
-        
         experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
-        
-        
+
         experiment = experiment[0]
         
         now = datetime.datetime.now()
@@ -76,8 +74,7 @@ def experiment(req):
         heat = max(min(int(req.POST.get("heat")), 100), 0)
         
         fan = max(min(int(req.POST.get("fan")), 100), 0)
-        
-        
+
         boards.setHeat(heat)
         
         boards.setFan(fan)
@@ -90,15 +87,12 @@ def experiment(req):
         timeleft = 5999
         STATUS = 1
         MESSAGE = "%s %d %d %2.2f" % (req.POST.get("iteration"),
-                                    heat,
-                                    fan,
-                                    temperature)
+                                      heat, fan, temperature)
         
         MESSAGE = "%s %s %d %d,%s,%d" % (MESSAGE,
-                                    req.POST.get("timestamp"),
-                                    server_start_ts,
-                                    server_end_ts,
-                                    req.POST.get("variables"), timeleft)
+                                         req.POST.get("timestamp"),
+                                         server_start_ts, server_end_ts,
+                                         req.POST.get("variables"), timeleft)
         
         f = open(experiment.log, "a")
         
@@ -109,25 +103,26 @@ def experiment(req):
     except Exception:
         return HttpResponse(json.dumps({"STATUS": 0, "MESSAGE": "Invalid input. Perhaps the slot has ended. Please book the next slot to continue the experiment."}))
 
+
 @csrf_exempt
 def reset(req):
     try:
         user = req.user
         if user.is_authenticated():
-			
             experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
 
             experiment = experiment[0]
             now = datetime.datetime.now()
             log_data(boards, experiment.coeff_ID)
-                
     except:
         pass
 
     return HttpResponse("")
 
+
 def client_version(req):
     return HttpResponse("3")
+
 
 @login_required(redirect_field_name=None)
 def logs(req):
@@ -135,6 +130,7 @@ def logs(req):
     for e in experiments:
         e.logname = e.log.split("\\")[-1]
     return render(req, "experiment/logs.html", {"experiments": reversed(experiments)})
+
 
 @login_required(redirect_field_name=None)
 def download_log(req, experiment_id, fn):
@@ -146,7 +142,8 @@ def download_log(req, experiment_id, fn):
         return HttpResponse(data, content_type='text/text')
     except:
         return HttpResponse("Requested log file doesn't exist.")
-		
+
+
 def log_data(sbhs, coeff_id, heat=None, fan=None, temp=None):
     f = open(settings.SBHS_GLOBAL_LOG_DIR + "/" + str(coeff_id) + ".log", "a")
     if heat is None:
@@ -159,6 +156,7 @@ def log_data(sbhs, coeff_id, heat=None, fan=None, temp=None):
     data = "%d %s %s %s\n" % (int(time.time()), str(heat), str(fan), str(temp))
     f.write(data)
     f.close()
+
 
 def validate_log_file(req):
     import hashlib
