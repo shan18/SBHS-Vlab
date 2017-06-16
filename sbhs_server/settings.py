@@ -7,8 +7,10 @@ https://docs.djangoproject.com/en/1.6/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
+
 import sys #srikant
 import socket
+
 hostname = socket.gethostname()
 is_production = hostname == "vlabs-Veriton-Series"
 
@@ -24,11 +26,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = 'skjndcijuwhfjc_cnjwcuwuhcnje490fu=@f('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = not is_production
 
 TEMPLATE_DEBUG = not is_production
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "192.168.43.208",
+    "192.168.43.144",
+    "10.42.0.1",
+]
 
 if not DEBUG:
     ALLOWED_HOSTS = [
@@ -42,23 +50,23 @@ if not DEBUG:
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'south',
+    # 'south',
     'undelete',
-#    'yaksh',
-#    'taggit',
+    # 'yaksh',
+    # 'taggit',
 
-    'sbhs_server.account',
-    'sbhs_server.admin',
-    'sbhs_server.experiment',
-    'sbhs_server.pages',
-    'sbhs_server.password',
+    'account',
+    'admin',
+    'experiment',
+    'pages',
+    'password',
     'sbhs_server.tables',
 )
 
@@ -82,7 +90,7 @@ WSGI_APPLICATION = 'sbhs_server.wsgi.application'
 if is_production:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql', 
+            'ENGINE': 'django.db.backends.mysql',
             'NAME': 'db_name',
             'USER': 'username',
             'PASSWORD': 'password',
@@ -147,11 +155,28 @@ if is_production:
 else:
     STATIC_URL = '/static/'
 
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, "production_static_files"),
-    os.path.join(BASE_DIR, 'templates/'),
-)
+# TEMPLATE_DIRS = (
+#     os.path.join(BASE_DIR, "production_static_files"),
+#     os.path.join(BASE_DIR, 'templates/'),
+# )
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 import warnings
 warnings.filterwarnings(

@@ -1,17 +1,20 @@
-from django.shortcuts import render, redirect
-from sbhs_server.tables.models import Account
-from django.contrib import messages
-from sbhs_server.helpers import simple_encrypt
-from sbhs_server.pages.views import index as INDEX_PAGE
 import datetime
 
-# Create your views here.
+from django.contrib import messages
+from django.shortcuts import render, redirect
+
+from pages.views import index as INDEX_PAGE
+from sbhs_server.helpers import simple_encrypt
+from sbhs_server.tables.models import Account
+
 
 def new(req):
     return render(req, 'password/new.html')
 
+
 def password_token(username):
     return simple_encrypt.encrypt(username + ",,," + str(datetime.datetime.now()))
+
 
 def email(req):
     email = req.POST.get("email")
@@ -22,6 +25,7 @@ def email(req):
         account[0].send_password_link(password_token(account[0].username))
         messages.add_message(req, messages.SUCCESS, "Password reset link has been sent to your email address.")
         return redirect(INDEX_PAGE)
+
 
 def validate_token(req, token):
     try:
@@ -37,6 +41,7 @@ def validate_token(req, token):
 
     return data, True
 
+
 def edit(req, token):
     data, flag = validate_token(req, token)
     if not flag:
@@ -49,6 +54,7 @@ def edit(req, token):
     else:
         messages.add_message(req, messages.ERROR, "The reset link is expired.")
         return redirect(INDEX_PAGE)
+
 
 def update(req, token):
     data, flag = validate_token(req, token)

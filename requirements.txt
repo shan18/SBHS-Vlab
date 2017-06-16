@@ -1,6 +1,5 @@
-Django==1.6.3
-South==0.8.4
+Django==1.11.1
 argparse==1.2.1
 git+https://github.com/cpbotha/django-undelete.git
-pyserial==2.7
+pyserial==3.0
 wsgiref==0.1.2

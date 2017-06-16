@@ -1,42 +1,48 @@
 from django.shortcuts import render, redirect
-from sbhs_server.tables.models import Account
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib import messages
-from sbhs_server.helpers import simple_encrypt
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as LOGIN
 from django.contrib.auth import logout as LOGOUT
 from django.contrib.auth.decorators import login_required
+
 import random
 import sys
 import os
-#The following line is needed to import Formula
+
+from sbhs_server.helpers import simple_encrypt
+from sbhs_server.tables.models import Account
+
+
+# The following line is needed to import Formula
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from sbhs_formula.formula import Formula
-# Create your views here.
+
 
 def index(req):
     if req.user.is_authenticated():
         return redirect(home)
     return render(req, "account/index.html")
 
+
 def new():
     pass
+
 
 def create(req):
     error = []
 
-    name        = req.POST.get("name").strip()
-    email       = req.POST.get("email").strip()
-    username    = req.POST.get("username").strip()
+    name = req.POST.get("name").strip()
+    email = req.POST.get("email").strip()
+    username = req.POST.get("username").strip()
     roll_number = req.POST.get("roll_number").strip()
-    password    = req.POST.get("password")
-    confirm     = req.POST.get("confirm")
-    institute   = req.POST.get("institute").strip()
-    department  = req.POST.get("department").strip()
-    position    = req.POST.get("position").strip()
-    coeff_ID    = random.randint(0,Formula.countCoeff()-1)
+    password = req.POST.get("password")
+    confirm = req.POST.get("confirm")
+    institute = req.POST.get("institute").strip()
+    department = req.POST.get("department").strip()
+    position = req.POST.get("position").strip()
+    coeff_ID = random.randint(0,Formula.countCoeff()-1)
 
     error = error + (["Please enter a name."] if name == "" else [])
     error = error + (["Please enter an email."] if email == "" else [])
@@ -77,6 +83,7 @@ def create(req):
     messages.add_message(req, messages.SUCCESS, "You have been registered successfully. Please check your email for confirmation.")
     return redirect(index)
 
+
 def confirm(req, token):
     try:
         email = simple_encrypt.decrypt(token)
@@ -88,6 +95,7 @@ def confirm(req, token):
         messages.add_message(req, messages.ERROR, "Invalid confirmation token.")
 
     return redirect(index)
+
 
 def login(req):
     username = req.POST.get('username')
@@ -104,9 +112,11 @@ def login(req):
         messages.add_message(req, messages.ERROR, "Invalid username or password.")
         return redirect(index)
 
+
 def logout(req):
     LOGOUT(req)
     return redirect(index)
+
 
 @login_required(redirect_field_name=None)
 def home(req):

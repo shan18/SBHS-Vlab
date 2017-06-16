@@ -2,13 +2,16 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.http import Http404
 from django.contrib.auth.decorators import login_required
+
 from sbhs_server import settings
+
 import subprocess
-# Create your views here.
+
 
 def checkadmin(req):
     if not req.user.is_admin:
         raise Http404
+
 
 @login_required(redirect_field_name=None)
 def profile(req, mid):
@@ -39,7 +42,7 @@ def profile(req, mid):
         except:
             continue
 
-    plot = zip(*plot) # transpose
+    plot = zip(*plot)  # transpose
 
     return render(req, "admin/profile.html", {
         "mid": mid,
