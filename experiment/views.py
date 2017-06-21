@@ -16,6 +16,10 @@ from sbhs_server import settings
 from sbhs_server import sbhs
 
 
+class InstantaneousTime:
+    instantaneous_time = 0
+
+
 def check_connection(req):
     return HttpResponse("TESTOK")
 
@@ -26,7 +30,7 @@ def initiation(req):
     password = req.POST.get("password")
     user = authenticate(username=username, password=password)
     if user is not None:
-        if user.is_active:			
+        if user.is_active:
             user1 = Account.objects.select_related().filter(id=user.id)
             user1 = user1[0]
             filename = datetime.datetime.strftime(datetime.datetime.now(), "%Y%b%d_%H_%M_%S.txt")
@@ -36,10 +40,18 @@ def initiation(req):
             f = open(os.path.join(logdir, filename), "a")
             f.close()
 
+            InstantaneousTime.instantaneous_time = 0
+
             LOGIN(req, user)
             e = Experiment()
             e.user = user
             e.log=os.path.join(logdir, filename)
+            e.save()
+
+
+            user.coeff_ID = user.id % 3
+
+
             boards = sbhs.Sbhs(user.coeff_ID)
             global boards
 
@@ -64,7 +76,7 @@ def experiment(req):
         server_start_ts = int(time.time() * 1000)
         
         user = req.user
-        
+
         experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
 
         experiment = experiment[0]
@@ -79,7 +91,8 @@ def experiment(req):
         
         boards.setFan(fan)
         
-        temperature = boards.getTemp()
+        temperature = boards.getTemp(InstantaneousTime.instantaneous_time)
+        InstantaneousTime.instantaneous_time += 1
         
         log_data(boards, user.coeff_ID, heat=heat, fan=fan, temp=temperature)
         
@@ -100,8 +113,8 @@ def experiment(req):
         
         f.close()
         return HttpResponse(json.dumps({"STATUS": STATUS, "MESSAGE": MESSAGE}))
-    except Exception:
-        return HttpResponse(json.dumps({"STATUS": 0, "MESSAGE": "Invalid input. Perhaps the slot has ended. Please book the next slot to continue the experiment."}))
+    except Exception as e:
+        return HttpResponse(json.dumps({"STATUS": 0, "MESSAGE": str(e)}))
 
 
 @csrf_exempt

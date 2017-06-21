@@ -1,31 +1,33 @@
-import sys
-import os
 from time import localtime
 from time import strftime
-from time import sleep
-from time import time
-from datetime import datetime
+
+import sys
+import os
 import random
-#The following line is needed to import Formula
+
+# The following line is needed to import Formula
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# from sbhs_formula.formula import Formula
 from sbhs_formula.formula import Formula
-#LOG_FILE = '../log/sbhserr.log'
+
+# LOG_FILE = '../log/sbhserr.log'
 LOG_FILE = '/tmp/sbhserr.log'
 
 MAX_HEAT = 100
 MAX_FAN = 100
 
+
 class Sbhs:
     """ This is the Single Board Heater System class """
-	
-    """ self.temp signifies the previous temperature measurement.It is intially set randomly"""
 
-    def __init__(self,coeff_ID):
+    """ self.temp signifies the previous temperature measurement.It is intially set randomly"""
+    def __init__(self, coeff_ID):
         # status of the board
         self.status = 0
         self.heat = 0
         self.fan = 0
-        self.temp = random.uniform(25.0,27.0)
+        self.temp = random.uniform(25.0, 27.0)
         self.formula = Formula(coeff_ID)
         
     def setHeat(self, val):
@@ -45,9 +47,9 @@ class Sbhs:
         self.fan = val
         return True
 
-    def getTemp(self):
+    def getTemp(self, instantaneous_time):
         """ Get the temperature """
-        return self.formula.getTemp(self.heat,self.fan)
+        return round(self.formula.getTemp(self.heat, self.fan, instantaneous_time) + self.temp, 2)
 
     def getHeat(self):
         return self.heat
