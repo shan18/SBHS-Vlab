@@ -47,9 +47,9 @@ def edit(req, token):
     if not flag:
         return data
 
-    timediff = datetime.datetime.now() - datetime.datetime.strptime(data[1], "%Y-%m-%d %H:%M:%S.%f")
+    time_diff = datetime.datetime.now() - datetime.datetime.strptime(data[1], "%Y-%m-%d %H:%M:%S.%f")
 
-    if timediff.total_seconds() < 7200:
+    if time_diff.total_seconds() < 7200:
         return render(req, "password/edit.html", {"token": token})
     else:
         messages.add_message(req, messages.ERROR, "The reset link is expired.")
@@ -61,9 +61,9 @@ def update(req, token):
     if not flag:
         return data
 
-    timediff = datetime.datetime.now() - datetime.datetime.strptime(data[1], "%Y-%m-%d %H:%M:%S.%f")
+    time_diff = datetime.datetime.now() - datetime.datetime.strptime(data[1], "%Y-%m-%d %H:%M:%S.%f")
 
-    if timediff.total_seconds() < 7200:
+    if time_diff.total_seconds() < 7200:
         username = data[0]
         account = Account.objects.filter(username=username)
         if len(account) == 1:

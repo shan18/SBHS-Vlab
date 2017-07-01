@@ -34,10 +34,10 @@ def initiation(req):
             user1 = Account.objects.select_related().filter(id=user.id)
             user1 = user1[0]
             filename = datetime.datetime.strftime(datetime.datetime.now(), "%Y%b%d_%H_%M_%S.txt")
-            logdir = os.path.join(settings.EXPERIMENT_LOGS_DIR, user.username)
-            if not os.path.exists(logdir):
-                os.makedirs(logdir)
-            f = open(os.path.join(logdir, filename), "a")
+            log_dir = os.path.join(settings.EXPERIMENT_LOGS_DIR, user.username)
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir)
+            f = open(os.path.join(log_dir, filename), "a")
             f.close()
 
             InstantaneousTime.instantaneous_time = 0
@@ -45,12 +45,10 @@ def initiation(req):
             LOGIN(req, user)
             e = Experiment()
             e.user = user
-            e.log=os.path.join(logdir, filename)
+            e.log=os.path.join(log_dir, filename)
             e.save()
 
-
             user.coeff_ID = user.id % 3
-
 
             boards = sbhs.Sbhs(user.coeff_ID)
             global boards
@@ -74,24 +72,20 @@ def experiment(req):
     # global boards
     try:
         server_start_ts = int(time.time() * 1000)
-        
         user = req.user
 
         experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
-
         experiment = experiment[0]
         
         now = datetime.datetime.now()
         
         heat = max(min(int(req.POST.get("heat")), 100), 0)
-        
         fan = max(min(int(req.POST.get("fan")), 100), 0)
 
-        boards.setHeat(heat)
+        boards.set_heat(heat)
+        boards.set_fan(fan)
         
-        boards.setFan(fan)
-        
-        temperature = boards.getTemp(InstantaneousTime.instantaneous_time)
+        temperature = boards.get_temp(InstantaneousTime.instantaneous_time)
         InstantaneousTime.instantaneous_time += 1
         
         log_data(boards, user.coeff_ID, heat=heat, fan=fan, temp=temperature)
@@ -108,9 +102,7 @@ def experiment(req):
                                          req.POST.get("variables"), timeleft)
         
         f = open(experiment.log, "a")
-        
         f.write(" ".join(MESSAGE.split(",")[:2]) + "\n")
-        
         f.close()
         return HttpResponse(json.dumps({"STATUS": STATUS, "MESSAGE": MESSAGE}))
     except Exception as e:
@@ -123,7 +115,6 @@ def reset(req):
         user = req.user
         if user.is_authenticated():
             experiment = Experiment.objects.select_related().filter(user_id=user.id).order_by("-id")
-
             experiment = experiment[0]
             now = datetime.datetime.now()
             log_data(boards, experiment.coeff_ID)
@@ -141,14 +132,14 @@ def client_version(req):
 def logs(req):
     experiments = Experiment.objects.select_related().filter(user_id=req.user.id)
     for e in experiments:
-        e.logname = e.log.split("\\")[-1]
+        e.log_name = e.log.split("\\")[-1]
     return render(req, "experiment/logs.html", {"experiments": reversed(experiments)})
 
 
 @login_required(redirect_field_name=None)
 def download_log(req, experiment_id, fn):
     try:
-        experiment = Experiment.objects.select_related().filter(user_id=req.user.id,id=experiment_id)
+        experiment = Experiment.objects.select_related().filter(user_id=req.user.id, id=experiment_id)
         f = open(experiment[0].log, "r")
         data = f.read()
         f.close()
@@ -160,11 +151,11 @@ def download_log(req, experiment_id, fn):
 def log_data(sbhs, coeff_id, heat=None, fan=None, temp=None):
     f = open(settings.SBHS_GLOBAL_LOG_DIR + "/" + str(coeff_id) + ".log", "a")
     if heat is None:
-        heat = sbhs.getHeat()
+        heat = sbhs.get_heat()
     if fan is None:
-        fan = sbhs.getFan()
+        fan = sbhs.get_fan()
     if temp is None:
-        temp = sbhs.getTemp()
+        temp = sbhs.get_temp()
 
     data = "%d %s %s %s\n" % (int(time.time()), str(heat), str(fan), str(temp))
     f.write(data)

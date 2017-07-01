@@ -18,7 +18,7 @@ except:
     sys.exit(1)
 
 # get list of device file names that start with ttyUSB* in the /dev folder
-#device_files = []
+# device_files = []
 device_files = [each for each in os.listdir('/dev') if each.startswith('ttyUSB')]
 print device_files
 
@@ -55,4 +55,3 @@ for device in device_files:
 print 'Done. Exiting...'
 map_machine_file.close()
 sys.exit(1)
-

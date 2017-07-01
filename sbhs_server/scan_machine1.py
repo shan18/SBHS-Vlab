@@ -18,7 +18,7 @@ except:
     sys.exit(1)
 
 # get list of device file names that start with ttyUSB* in the /dev folder
-#device_files = []
+# device_files = []
 device_files = [each for each in os.listdir('/dev') if each.startswith('ttyUSB')]
 
 # if no device filename found then exit
@@ -36,18 +36,18 @@ for device in device_files:
     try:
         dev_id = int(dev_id)
     except:
-        #res = False
+        # res = False
         print 'Invalid device name /dev/%s' % device
         continue
     # connect to device
     res = s.connect_device(dev_id)
-    #print res
+    # print res
     if not res:
         print "Couldn't connect to the device on /dev/ttyUSB{0}. Retrying!!".format(dev_id)
         for i in range(5):
             res2 = s.connect_device(dev_id)
             print "Trying!!! Attempt {0} for ttyUSB{1}".format(i, dev_id)
-            if res2 == True:
+            if res2:
                 port_counter += 1
         if port_counter < 3: 
             print 'Cannot connect to /dev/%s.' % device
@@ -59,7 +59,7 @@ for device in device_files:
             print machine_id
         except AttributeError:
             machine_id = -1
-        #machine_id = s.getMachineId()
+        # machine_id = s.getMachineId()
         if machine_id > 0:
             mid_counter+=1
             
@@ -76,10 +76,3 @@ for device in device_files:
 print 'Done. Exiting...'
 map_machine_file.close()
 sys.exit(1)
-
-
-
-
-
-
-

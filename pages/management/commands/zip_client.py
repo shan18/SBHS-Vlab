@@ -2,12 +2,13 @@ from django.core.management.base import BaseCommand
 import os, zipfile, shutil, distutils.core
 from sbhs_server import settings
 
+
 class Command(BaseCommand):
     args = ''
     help = 'ZIP all clients for all architectures.'
 
     def handle(self, *args, **options):
-        def zipdir(path, zip, rootname):
+        def zip_dir(path, zip, rootname):
             for root, dirs, files in os.walk(path):
                 for file in files:
                     pathname = os.path.join(root, file)
@@ -22,7 +23,7 @@ class Command(BaseCommand):
         print dirs
         dirs.remove(scilab_codes_dirname)
         dirs.remove(zipped_dirname)
-	print dirs
+        print dirs
         dirs = [d for d in dirs if os.path.isdir(os.path.join(settings.SBHSCLIENT_STATIC_DIR, d))]
         print dirs
         dirs = [d for d in dirs if not d.startswith(".")]
@@ -61,6 +62,6 @@ class Command(BaseCommand):
                 pass
     
             zipf = zipfile.ZipFile(os.path.join(zipped_dirpath, "sbhsclient/scilab_codes_" + dirname + ".zip"), 'w', zipfile.ZIP_DEFLATED)
-            zipdir(tmp_dirpath, zipf, "scilab_codes_" + dirname)
+            zip_dir(tmp_dirpath, zipf, "scilab_codes_" + dirname)
             zipf.close()
             shutil.rmtree(tmp_dirpath)

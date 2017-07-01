@@ -30,7 +30,7 @@ class Sbhs:
         self.temp = random.uniform(25.0, 27.0)
         self.formula = Formula(coeff_ID)
         
-    def setHeat(self, val):
+    def set_heat(self, val):
         """ Set the heat """
         if val > MAX_HEAT or val < 0:
             print 'Error: heat value cannot be more than %d' % MAX_HEAT
@@ -39,7 +39,7 @@ class Sbhs:
         self.heat = val
         return True
 
-    def setFan(self, val):
+    def set_fan(self, val):
         """ Set the fan """
         if val > MAX_FAN or val < 0:
             print 'Error: fan value cannot be more than %d' % MAX_FAN
@@ -47,32 +47,28 @@ class Sbhs:
         self.fan = val
         return True
 
-    def getTemp(self, instantaneous_time):
+    def get_temp(self, instantaneous_time):
         """ Get the temperature """
-        return round(self.formula.getTemp(self.heat, self.fan, instantaneous_time) + self.temp, 2)
+        return round(self.formula.get_temp(self.heat, self.fan, instantaneous_time) + self.temp, 2)
 
-    def getHeat(self):
+    def get_heat(self):
         return self.heat
 
-    def getFan(self):
+    def get_fan(self):
         return self.fan
 
     def reset_board(self):
-        self.setFan(100)
-        self.setHeat(0)
-
-    
+        self.set_fan(100)
+        self.set_heat(0)
 
     def log(self, msg, level):
         try:
-            errfile = open(LOG_FILE, 'a') # open error log file in append mode
-            if not errfile:
+            err_file = open(LOG_FILE, 'a') # open error log file in append mode
+            if not err_file:
                 return
             log_msg = '%s %s %s\n' %(level, strftime('%d:%m:%Y %H:%M:%S', localtime()), msg)
-            errfile.write(log_msg)
-            errfile.close()
+            err_file.write(log_msg)
+            err_file.close()
             return
         except:
             return
-			
-

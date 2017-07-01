@@ -3,6 +3,7 @@ from sbhs_server import settings
 from sbhs_server.tables.models import Board
 from sbhs_server import helpers
 
+
 class Command(BaseCommand):
     args = ''
     help = 'Initializes the SBHS board data in the database'

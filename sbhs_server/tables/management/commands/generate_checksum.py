@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from sbhs_server.tables.models import Experiment
 import hashlib
 
+
 class Command(BaseCommand):
     args = ''
     help = 'Calculates checksum for unchecked experiments'

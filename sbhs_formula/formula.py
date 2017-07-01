@@ -16,7 +16,7 @@ class Formula:
         # coeff.txt has values in format: mass  resistance  specific heat
         self.coeff = [float(c) for c in lines[i].split()]
 
-    def getTemp(self, heat, fan, instantaneous_time):
+    def get_temp(self, heat, fan, instantaneous_time):
         """ Add required Formula here """
         mass = self.coeff[0]
         resistance = self.coeff[1]
@@ -26,8 +26,8 @@ class Formula:
         return heat_in_joules / (mass * sp_heat)
 
     @staticmethod
-    def countCoeff():
+    def count_coeff():
         """ This method counts the number of Coefficient Sets available"""
-        with open(x,'r') as f:
+        with open(x, 'r') as f:
             lines = f.readlines()
         return len(lines)

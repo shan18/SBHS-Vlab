@@ -42,7 +42,7 @@ def create(req):
     institute = req.POST.get("institute").strip()
     department = req.POST.get("department").strip()
     position = req.POST.get("position").strip()
-    coeff_ID = random.randint(0,Formula.countCoeff()-1)
+    coeff_ID = random.randint(0, Formula.count_coeff() - 1)
 
     error = error + (["Please enter a name."] if name == "" else [])
     error = error + (["Please enter an email."] if email == "" else [])

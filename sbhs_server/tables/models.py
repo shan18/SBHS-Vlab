@@ -1,32 +1,28 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from undelete.models import TrashableMixin
-import random
-import datetime
-import os
-import sys
 from sbhs_server.helpers import mailer
 from sbhs_server.helpers import simple_encrypt
 from django.contrib.auth.models import UserManager
 from sbhs_server import settings
-#from yaksh.models import Profile
+# from yaksh.models import Profile
 # Create your models here.
 
 
 class Account(TrashableMixin, AbstractBaseUser):
 
-    name                = models.CharField(max_length=255)
-    username            = models.CharField(max_length=127, unique=True)
-    email               = models.EmailField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
+    username = models.CharField(max_length=127, unique=True)
+    email = models.EmailField(max_length=255, unique=True)
     # password = models.CharField(max_length=255) # Already covered in AbstractBaseUser
 
-    is_active           = models.BooleanField(default=False)
-    is_admin            = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
 
-    coeff_ID              = models.IntegerField(default=0)
+    coeff_ID = models.IntegerField(default=0)
 
-    created_at          = models.DateTimeField(auto_now_add=True, editable=False)
-    updated_at          = models.DateTimeField(auto_now=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     objects = UserManager()
 
@@ -53,19 +49,17 @@ class Account(TrashableMixin, AbstractBaseUser):
     def get_profile(self):
         return self.profile
 
-
     def confirmation_token(self):
         return simple_encrypt.encrypt(self.email)
 
 
-
 class Experiment(TrashableMixin):
 
-    user                = models.ForeignKey("Account")
+    user = models.ForeignKey("Account")
 
-    log                 = models.CharField(max_length=255)
-    checksum            = models.CharField(max_length=255, default="NONE")
-    #coeff_ID            = models.IntegerField(default=0)
+    log = models.CharField(max_length=255)
+    checksum = models.CharField(max_length=255, default="NONE")
+    # coeff_ID = models.IntegerField(default=0)
 
-    created_at          = models.DateTimeField(auto_now_add=True, editable=False)
-    updated_at          = models.DateTimeField(auto_now=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True, editable=False)
