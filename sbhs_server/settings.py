@@ -268,9 +268,8 @@ EXPERIMENT_LOGS_DIR = os.path.join(BASE_DIR, 'experiments')
 
 if not is_production:
     SBHS_ADMINS = (
-        # ("Amol Mandhane", "+91-9999999999", "amol_mandhane@iitb.ac.in"),
-        # ("Amol Mandhane", "+91-9999999999", "amol_mandhane@iitb.ac.in"),
-        ("Shantanu Acharya", "+91-0123456789", "thegeek.004@gmail.com"),
+        ("Amol Mandhane", "+91-9999999999", "amol_mandhane@iitb.ac.in"),
+        ("Amol Mandhane", "+91-9999999999", "amol_mandhane@iitb.ac.in"),
     )
 else:
     from sbhs_server.sbhs_admin_config import SBHS_ADMINS
