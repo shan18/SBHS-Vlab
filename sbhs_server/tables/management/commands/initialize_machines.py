@@ -27,7 +27,7 @@ class Command(BaseCommand):
         message += "SBHS could not be connected\n"
         for n in new_offlines:
             message += ("MID: %d\n" % n)
-        message += "\nYou can check the SBHS status on http://vlabs.iitb.ac.in/sbhs/admin/."
+        message += "\nYou can check the SBHS status on http://vlabs.iitb.ac.in/sbhs/custom_admin/."
         message += " Possible correction actions are:\n"
         message += "1. Run this command without brackets -> ( cd $SBHS_SERVER_ROOT; ./cron_job.sh )\n"
         message += "2. If same machine comes offline multiple times, replacement of the machine is advised.\n\n\n"

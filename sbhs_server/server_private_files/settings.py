@@ -42,7 +42,7 @@ if not DEBUG:
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
+    'django.contrib.custom_admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -53,7 +53,7 @@ INSTALLED_APPS = (
     'undelete',
 
     'sbhs_server.account',
-    'sbhs_server.admin',
+    'sbhs_server.custom_admin',
     'sbhs_server.experiment',
     'sbhs_server.pages',
     'sbhs_server.password',

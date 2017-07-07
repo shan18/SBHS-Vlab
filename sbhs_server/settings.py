@@ -17,6 +17,7 @@ is_production = hostname == "vlabs-Veriton-Series"
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+OUTPUT_DIR = os.path.join(BASE_DIR, 'output')
 
 
 # Quick-start development settings - unsuitable for production
@@ -38,6 +39,11 @@ ALLOWED_HOSTS = [
     "10.42.0.1",
 ]
 
+# Application definition
+FIXTURE_DIRS = os.path.join(BASE_DIR, "yaksh", "fixtures")
+
+URL_ROOT = ''
+
 if not DEBUG:
     ALLOWED_HOSTS = [
         "localhost",
@@ -50,7 +56,7 @@ if not DEBUG:
 # Application definition
 
 INSTALLED_APPS = (
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -59,11 +65,12 @@ INSTALLED_APPS = (
 
     # 'south',
     'undelete',
-    # 'yaksh',
-    # 'taggit',
+    'yaksh',
+    'taggit',
+    'social.apps.django_app.default',
 
     'account',
-    'admin',
+    'custom_admin',
     'experiment',
     'pages',
     'password',
@@ -75,6 +82,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'yaksh.middleware.one_session_per_user.OneSessionPerUserMiddleware',
+    'yaksh.middleware.user_time_zone.TimezoneMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -117,20 +126,50 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = False
+USE_TZ = True
 
 AUTH_USER_MODEL = 'tables.Account'
 LOGIN_URL = '/sbhs/enter'
+LOGIN_REDIRECT_URL = '/sbhs/'
 LOGOUT_URL = '/sbhs/logout'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_NAME = "pfesgbxra"
 SESSION_COOKIE_NAME = "frffvbaVq"
+
+MEDIA_URL = "/data/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "yaksh", "data")
+
+# Set this varable to <True> if smtp-server is not allowing to send email.
+EMAIL_USE_TLS = False
 
 EMAIL_HOST = 'smtp-auth.iitb.ac.in'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = "username"
 EMAIL_HOST_PASSWORD = "password"
 
+# Set EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend' in production
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+
+# SENDER_EMAIL, REPLY_EMAIL, PRODUCTION_URL, IS_DEVELOPMENT are used in email
+# verification. Set the variables accordingly to avoid errors in production
+
+# This email id will be used as <from address> for sending emails.
+# For example no_reply@<your_organization>.in can be used.
+SENDER_EMAIL = 'your_email'
+
+# Organisation/Indivudual Name.
+SENDER_NAME = 'your_name'
+
+# This email id will be used by users to send their queries
+# For example queries@<your_organization>.in can be used.
+REPLY_EMAIL = 'your_reply_email'
+
+# This url will be used in email verification to create activation link.
+# Add your hosted url to this variable.
+# For example https://127.0.0.1:8000 or 127.0.0.1:8000
+PRODUCTION_URL = 'your_project_url'
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/

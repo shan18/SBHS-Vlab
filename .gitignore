@@ -1,5 +1,10 @@
 *.pyc
+*.sqlite3
 experiments/
 log/
-*.sqlite3
 migrations/
+.idea/
+account/__pycache__/
+custom_admin/__pycache__/
+sbhs_server/__pycache__/
+yaksh/data/

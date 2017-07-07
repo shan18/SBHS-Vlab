@@ -3,21 +3,60 @@ from django.contrib.auth.models import AbstractBaseUser
 from undelete.models import TrashableMixin
 from sbhs_server.helpers import mailer
 from sbhs_server.helpers import simple_encrypt
-from django.contrib.auth.models import UserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from sbhs_server import settings
 # from yaksh.models import Profile
 # Create your models here.
 
 
-class Account(TrashableMixin, AbstractBaseUser):
+class UserManager(BaseUserManager):
+    def create_user(self, email, username, password=None):
+        """
+        Creates and saves a User with the given email, date of
+        birth and password.
+        """
+        if not email:
+            raise ValueError('Users must have an email address')
 
+        user = self.model(
+            email=self.normalize_email(email),
+            username=username,
+        )
+
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password):
+        """
+        Creates and saves a superuser with the given email, date of
+        birth and password.
+        """
+        user = self.create_user(
+            email='hello@gola.com',
+            username=username,
+            password=password,
+        )
+        user.is_admin = True
+        user.is_active = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+
+
+class Account(TrashableMixin, AbstractBaseUser, PermissionsMixin):
+
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     username = models.CharField(max_length=127, unique=True)
     email = models.EmailField(max_length=255, unique=True)
     # password = models.CharField(max_length=255) # Already covered in AbstractBaseUser
 
     is_active = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     coeff_ID = models.IntegerField(default=0)
 
@@ -51,6 +90,25 @@ class Account(TrashableMixin, AbstractBaseUser):
 
     def confirmation_token(self):
         return simple_encrypt.encrypt(self.email)
+
+    def __unicode__(self):  # __unicode__ on Python 2
+        return self.email
+
+    def has_perm(self, perm, obj=None):
+        "Does the user have a specific permission?"
+        # Simplest possible answer: Yes, always
+        return True
+
+    def has_module_perms(self, app_label):
+        "Does the user have permissions to view the app `app_label`?"
+        # Simplest possible answer: Yes, always
+        return True
+
+    @property
+    def is_staff(self):
+        "Is the user a member of staff?"
+        # Simplest possible answer: All admins are staff
+        return self.is_admin
 
 
 class Experiment(TrashableMixin):
