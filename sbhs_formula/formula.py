@@ -19,12 +19,6 @@ class Formula:
         """ Add required Formula here """
         k = self.coeff[0]
 
-        # 1st Order Model
-        tow = self.coeff[1]
-        exp_power = -1 * (instantaneous_time / tow)
-        value = k * (1 - math.exp(exp_power))
-        return value * heat + random.uniform(-0.5, 0.5)
-
         """ 2nd Order Model
         tow_1 = self.coeff[1]
         tow_2 = self.coeff[2]
@@ -34,6 +28,20 @@ class Formula:
         heat_value = k * heat * (1 - val)
         return heat_value + random.uniform(-0.5, 0.5)
         """
+
+        # 1st Order Model
+        tow = self.coeff[1]
+
+        # Effect of Heat
+        exp_power = -1 * (instantaneous_time / tow)
+        value = k * (1 - math.exp(exp_power))
+        change_in_output_for_heat = value * heat
+
+        # Effect of Fan
+        change_in_output_for_fan = fan
+
+        change_in_output = abs(change_in_output_for_heat - change_in_output_for_fan)
+        return change_in_output + random.uniform(-0.5, 0.5)
 
     @staticmethod
     def count_coeff():
