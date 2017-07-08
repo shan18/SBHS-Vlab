@@ -8,7 +8,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
-import sys #srikant
 import socket
 
 hostname = socket.gethostname()
@@ -63,7 +62,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # 'south',
     'undelete',
     'yaksh',
     'taggit',
@@ -129,7 +127,7 @@ USE_L10N = True
 USE_TZ = True
 
 AUTH_USER_MODEL = 'tables.Account'
-LOGIN_URL = '/sbhs/enter'
+LOGIN_URL = '/enter'
 LOGIN_REDIRECT_URL = '/sbhs/'
 LOGOUT_URL = '/sbhs/logout'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

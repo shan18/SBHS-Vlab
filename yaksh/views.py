@@ -44,6 +44,7 @@ from yaksh.models import AssignmentUpload
 from .file_utils import extract_files
 from .send_emails import send_user_mail, generate_activation_key
 from .decorators import email_verified
+from sbhs_server import settings
 
 
 def my_redirect(url):
@@ -64,8 +65,6 @@ def my_render_to_response(request, template, context=None, **kwargs):
 
 def is_moderator(user):
     """Check if the user is having moderator rights"""
-    # if user.groups.filter(name='moderator').exists():
-    #     return True
     return user.is_admin
 
 
@@ -86,38 +85,7 @@ def index(request, next_url=None):
             return my_redirect('/exam/manage/' if not next_url else next_url)
         return my_redirect("/exam/quizzes/" if not next_url else next_url)
 
-    return my_redirect("/exam/login/")
-
-
-def user_register(request):
-    """ Register a new user.
-    Create a user and corresponding profile and store roll_number also."""
-
-    user = request.user
-    ci = RequestContext(request)
-    if user.is_authenticated():
-        return my_redirect("/exam/quizzes/")
-    context = {}
-    if request.method == "POST":
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            data = form.cleaned_data
-            u_name, pwd, user_email, key = form.save()
-            new_user = authenticate(username=u_name, password=pwd)
-            login(request, new_user)
-            if user_email and key:
-                success, msg = send_user_mail(user_email, key)
-                context = {'activation_msg': msg}
-                return my_render_to_response(request, 'yaksh/activation_status.html',
-                                            context)
-            return index(request)
-        else:
-            return my_render_to_response(request, 'yaksh/register.html', {'form': form},
-                                         context_instance=ci)
-    else:
-        form = UserRegisterForm()
-        return my_render_to_response(request, 'yaksh/register.html', {'form': form},
-                                      context_instance=ci)
+    return my_redirect(settings.LOGIN_URL)
 
 
 def user_logout(request):
@@ -323,35 +291,7 @@ def prof_manage(request, msg=None):
                    'trial_paper': trial_paper, 'msg': msg
                    }
         return my_render_to_response(request, 'yaksh/moderator_dashboard.html', context, context_instance=ci)
-    return my_redirect('/exam/login/')
-
-
-def user_login(request):
-    """Take the credentials of the user and log the user in."""
-
-    user = request.user
-    ci = RequestContext(request)
-    context = {}
-    if user.is_authenticated():
-        return index(request)
-
-    next_url = request.GET.get('next')
-
-    if request.method == "POST":
-        form = UserLoginForm(request.POST)
-        if form.is_valid():
-            user = form.cleaned_data
-            login(request, user)
-            return index(request, next_url)
-        else:
-            context = {"form": form}
-
-    else:
-        form = UserLoginForm()
-        context = {"form": form}
-
-    return my_render_to_response(request, request, 'yaksh/login.html', context,
-                                 context_instance=ci)
+    return my_redirect(settings.LOGIN_URL)
 
 
 @login_required

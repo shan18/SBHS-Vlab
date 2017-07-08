@@ -3,7 +3,6 @@ from yaksh import views
 
 urlpatterns = [
     url(r'^$', views.index),
-    url(r'^login/$', views.user_login, name='login'),
     url(r'^logout/$', views.user_logout),
     url(r'^update_email/$', views.update_email, name="update_email"),
     url(r'^activate/(?P<key>.+)$', views.activate_user, name="activate"),
@@ -18,7 +17,6 @@ urlpatterns = [
     url(r'^complete/$', views.complete),
     url(r'^complete/(?P<attempt_num>\d+)/(?P<questionpaper_id>\d+)/$',\
             views.complete),
-    url(r'^register/$', views.user_register, name="register"),
     url(r'^(?P<q_id>\d+)/check/$', views.check),
     url(r'^(?P<q_id>\d+)/check/(?P<attempt_num>\d+)/(?P<questionpaper_id>\d+)/$',\
             views.check),
