@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser
 from undelete.models import TrashableMixin
 from sbhs_server.helpers import mailer
 from sbhs_server.helpers import simple_encrypt

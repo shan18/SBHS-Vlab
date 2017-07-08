@@ -1,9 +1,8 @@
 from __future__ import unicode_literals
-import time
-import random
-import socket
+
 import json
 import urllib
+
 from six.moves import urllib
 
 try:
@@ -13,11 +12,12 @@ except ImportError:
     from xmlrpc.client import ServerProxy
 
 # Local imports
-from .settings import SERVER_PORTS, SERVER_POOL_PORT
+from .settings import SERVER_POOL_PORT
 
 
 class ConnectionError(Exception):
     pass
+
 
 ###############################################################################
 # `CodeServerProxy` class.
@@ -68,9 +68,9 @@ class CodeServerProxy(object):
             result = server.check_code(language, json_data, user_dir)
         except ConnectionError:
             result = json.dumps({'success': False,
-                'weight': 0.0,
-                'error': ['Unable to connect to any code servers!']
-                })
+                                 'weight': 0.0,
+                                 'error': ['Unable to connect to any code servers!']
+                                 })
         return result
 
     def _get_server(self):

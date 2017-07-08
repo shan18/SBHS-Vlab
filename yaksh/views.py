@@ -1,16 +1,15 @@
-import random
-import string
 import os
-from datetime import datetime, timedelta
-import collections
 import csv
+import zipfile
+import json
+import six
+
 from django.http import HttpResponse
-from django.core.urlresolvers import reverse
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import logout
 from django.shortcuts import render_to_response, get_object_or_404, redirect, render
 from django.template import RequestContext
 from django.http import Http404
-from django.db.models import Sum, Max, Q, F
+from django.db.models import Max, Q, F
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
@@ -18,29 +17,21 @@ from django.forms.models import inlineformset_factory
 from django.utils import timezone
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.conf import settings
-import pytz
-from taggit.models import Tag
-from itertools import chain
-import json
-import six
+
 from textwrap import dedent
-import zipfile
+
 try:
     from StringIO import StringIO as string_io
 except ImportError:
     from io import BytesIO as string_io
+
 # Local imports.
-from yaksh.models import get_model_class, Quiz, Question, QuestionPaper, QuestionSet, Course
-from yaksh.models import Profile, Answer, AnswerPaper, User, TestCase, FileUpload,\
-                         has_profile, StandardTestCase, McqTestCase,\
-                         StdIOBasedTestCase, HookTestCase, IntegerTestCase,\
-                         FloatTestCase, StringTestCase
-from yaksh.forms import UserRegisterForm, UserLoginForm, QuizForm,\
-                QuestionForm, RandomQuestionForm,\
-                QuestionFilterForm, CourseForm, ProfileForm, UploadFileForm,\
-                get_object_form, FileForm, QuestionPaperForm
-from .settings import URL_ROOT
+from yaksh.models import Quiz, Question, QuestionPaper, QuestionSet, Course
+from yaksh.models import Profile, Answer, AnswerPaper, User, TestCase, FileUpload, has_profile
 from yaksh.models import AssignmentUpload
+from yaksh.forms import QuizForm, QuestionForm,\
+                QuestionFilterForm, CourseForm, ProfileForm, UploadFileForm, FileForm, QuestionPaperForm
+from .settings import URL_ROOT
 from .file_utils import extract_files
 from .send_emails import send_user_mail, generate_activation_key
 from .decorators import email_verified
@@ -74,6 +65,7 @@ def add_to_group(users):
     for user in users:
         if not is_moderator(user):
             user.groups.add(group)
+
 
 @email_verified
 def index(request, next_url=None):
@@ -117,8 +109,7 @@ def quizlist_user(request, enrolled=None):
 
     context = {'user': user, 'courses': courses, 'title': title}
 
-    return my_render_to_response(request, "yaksh/quizzes_user.html", context,
-        context_instance=ci)
+    return my_render_to_response(request, "yaksh/quizzes_user.html", context, context_instance=ci)
 
 
 @login_required
@@ -250,6 +241,7 @@ def add_quiz(request, course_id, quiz_id=None):
                                      context,
                                      context_instance=ci)
 
+
 @login_required
 @email_verified
 def prof_manage(request, msg=None):
@@ -271,7 +263,7 @@ def prof_manage(request, msg=None):
             for answerpaper_id in delete_paper:
                 answerpaper = AnswerPaper.objects.get(id=answerpaper_id)
                 qpaper = answerpaper.question_paper
-                if qpaper.quiz.course.is_trial == True:
+                if qpaper.quiz.course.is_trial:
                     qpaper.quiz.course.delete()
                 else:
                     if qpaper.answerpaper_set.count() == 1:
@@ -281,10 +273,8 @@ def prof_manage(request, msg=None):
         users_per_paper = []
         for paper in question_papers:
             answer_papers = AnswerPaper.objects.filter(question_paper=paper)
-            users_passed = AnswerPaper.objects.filter(question_paper=paper,
-                    passed=True).count()
-            users_failed = AnswerPaper.objects.filter(question_paper=paper,
-                    passed=False).count()
+            users_passed = AnswerPaper.objects.filter(question_paper=paper, passed=True).count()
+            users_failed = AnswerPaper.objects.filter(question_paper=paper, passed=False).count()
             temp = paper, answer_papers, users_passed, users_failed
             users_per_paper.append(temp)
         context = {'user': user, 'users_per_paper': users_per_paper,
@@ -297,7 +287,7 @@ def prof_manage(request, msg=None):
 @login_required
 @email_verified
 def start(request, questionpaper_id=None, attempt_num=None):
-    """Check the user cedentials and if any quiz is available,
+    """Check the user credentials and if any quiz is available,
     start the exam."""
     user = request.user
     ci = RequestContext(request)
@@ -363,7 +353,7 @@ def show_question(request, question, paper, error_message=None, notification=Non
         reason = 'The quiz has been deactivated!'
         return complete(request, reason, paper.attempt_number, paper.question_paper.id)
     if paper.time_left() <= 0:
-        reason='Your time is up!'
+        reason = 'Your time is up!'
         return complete(request, reason, paper.attempt_number, paper.question_paper.id)
     if question in paper.questions_answered.all():
         notification = 'You have already attempted this question successfully' \
@@ -372,8 +362,8 @@ def show_question(request, question, paper, error_message=None, notification=Non
     test_cases = question.get_test_cases()
     files = FileUpload.objects.filter(question_id=question.id, hide=False)
     context = {'question': question, 'paper': paper, 'error_message': error_message,
-                'test_cases': test_cases, 'files': files, 'notification': notification,
-                'last_attempt': question.snippet.encode('unicode-escape')}
+               'test_cases': test_cases, 'files': files, 'notification': notification,
+               'last_attempt': question.snippet.encode('unicode-escape')}
     answers = paper.get_previous_answers(question)
     if answers:
         last_attempt = answers[0].answer
@@ -388,7 +378,7 @@ def show_question(request, question, paper, error_message=None, notification=Non
 def skip(request, q_id, next_q=None, attempt_num=None, questionpaper_id=None):
     user = request.user
     paper = get_object_or_404(AnswerPaper, user=request.user, attempt_number=attempt_num,
-            question_paper=questionpaper_id)
+                              question_paper=questionpaper_id)
     question = get_object_or_404(Question, pk=q_id)
 
     if request.method == 'POST' and question.type == 'code':
@@ -411,7 +401,7 @@ def check(request, q_id, attempt_num=None, questionpaper_id=None):
     """Checks the answers of the user for particular question"""
     user = request.user
     paper = get_object_or_404(AnswerPaper, user=request.user, attempt_number=attempt_num,
-            question_paper=questionpaper_id)
+                              question_paper=questionpaper_id)
     current_question = get_object_or_404(Question, pk=q_id)
 
     if request.method == 'POST':
@@ -460,13 +450,13 @@ def check(request, q_id, attempt_num=None, questionpaper_id=None):
                     os.remove(assign_file.assignmentFile.path)
                     assign_file.delete()
                 AssignmentUpload.objects.create(user=user,
-                    assignmentQuestion=current_question, assignmentFile=fname,
-                    question_paper_id=questionpaper_id
-                    )
+                                                assignmentQuestion=current_question, assignmentFile=fname,
+                                                question_paper_id=questionpaper_id
+                                                )
             user_answer = 'ASSIGNMENT UPLOADED'
             if not current_question.grade_assignment_upload:
                 new_answer = Answer(question=current_question, answer=user_answer,
-                            correct=False, error=json.dumps([]))
+                                    correct=False, error=json.dumps([]))
                 new_answer.save()
                 paper.answers.add(new_answer)
                 next_q = paper.add_completed_question(current_question.id)
@@ -485,14 +475,13 @@ def check(request, q_id, attempt_num=None, questionpaper_id=None):
         # questions, we obtain the results via XML-RPC with the code executed
         # safely in a separate process (the code_server.py) running as nobody.
         json_data = current_question.consolidate_answer_data(user_answer, user) \
-                    if current_question.type == 'code' or \
-                    current_question.type == 'upload' else None
+            if current_question.type == 'code' or current_question.type == 'upload' else None
         result = paper.validate_answer(user_answer, current_question,
                                        json_data
-                                           )
+                                       )
         if result.get('success'):
-            new_answer.marks = (current_question.points * result['weight'] / 
-                current_question.get_maximum_test_case_weight()) \
+            new_answer.marks = (current_question.points * result['weight'] /
+                                current_question.get_maximum_test_case_weight()) \
                 if current_question.partial_grading and \
                 current_question.type == 'code' or current_question.type == 'upload' \
                 else current_question.points
@@ -502,7 +491,7 @@ def check(request, q_id, attempt_num=None, questionpaper_id=None):
             next_question = paper.add_completed_question(current_question.id)
         else:
             new_answer.marks = (current_question.points * result['weight'] /
-                current_question.get_maximum_test_case_weight()) \
+                                current_question.get_maximum_test_case_weight()) \
                 if current_question.partial_grading and \
                 current_question.type == 'code' or current_question.type == 'upload' \
                 else 0
@@ -518,7 +507,6 @@ def check(request, q_id, attempt_num=None, questionpaper_id=None):
         return show_question(request, next_question, paper, error_message)
     else:
         return show_question(request, current_question, paper)
-
 
 
 def quit(request, reason=None, attempt_num=None, questionpaper_id=None):
@@ -544,7 +532,7 @@ def complete(request, reason=None, attempt_num=None, questionpaper_id=None):
     else:
         q_paper = QuestionPaper.objects.get(id=questionpaper_id)
         paper = AnswerPaper.objects.get(user=user, question_paper=q_paper,
-                attempt_number=attempt_num)
+                                        attempt_number=attempt_num)
         paper.update_marks()
         paper.set_end_time(timezone.now())
         message = reason or "Quiz has been submitted"
@@ -642,7 +630,7 @@ def course_detail(request, course_id):
         raise Http404('This course does not belong to you')
 
     return my_render_to_response(request, 'yaksh/course_detail.html', {'course': course},
-                                context_instance=ci)
+                                 context_instance=ci)
 
 
 @login_required
@@ -668,7 +656,7 @@ def enroll(request, course_id, user_id=None, was_rejected=False):
         enroll_ids = [user_id]
     if not enroll_ids:
         return my_render_to_response(request, 'yaksh/course_detail.html', {'course': course},
-                                            context_instance=ci)
+                                     context_instance=ci)
     users = User.objects.filter(id__in=enroll_ids)
     course.enroll(was_rejected, *users)
     return course_detail(request, course_id)
@@ -692,7 +680,7 @@ def reject(request, course_id, user_id=None, was_enrolled=False):
         reject_ids = [user_id]
     if not reject_ids:
         return my_render_to_response(request, 'yaksh/course_detail.html', {'course': course},
-                                            context_instance=ci)
+                                     context_instance=ci)
     users = User.objects.filter(id__in=reject_ids)
     course.reject(was_enrolled, *users)
     return course_detail(request, course_id)
@@ -784,9 +772,9 @@ def monitor(request, quiz_id=None):
             last_attempt = papers.filter(user__in=auser).aggregate(
                     last_attempt_num=Max('attempt_number'))
             latest_attempts.append(papers.get(user__in=auser,
-                attempt_number=last_attempt['last_attempt_num']))
+                                              attempt_number=last_attempt['last_attempt_num']))
     context = {'papers': papers, "quiz": quiz, "msg": "Quiz Results",
-            'latest_attempts': latest_attempts}
+               'latest_attempts': latest_attempts}
     return my_render_to_response(request, 'yaksh/monitor.html', context,
                                  context_instance=ci)
 
@@ -811,8 +799,7 @@ def ajax_questions_filter(request):
         filter_dict['language'] = str(language)
     questions = list(Question.objects.filter(**filter_dict))
 
-    return my_render_to_response(request, 'yaksh/ajax_question_filter.html',
-                                  {'questions': questions})
+    return my_render_to_response(request, 'yaksh/ajax_question_filter.html', {'questions': questions})
 
 
 def _get_questions(user, question_type, marks):
@@ -820,9 +807,9 @@ def _get_questions(user, question_type, marks):
         return None
     if question_type:
         questions = Question.objects.filter(type=question_type,
-             user=user,
-             active=True
-        )
+                                            user=user,
+                                            active=True
+                                            )
         if marks:
             questions = questions.filter(points=marks)
     return questions
@@ -920,11 +907,11 @@ def design_questionpaper(request, quiz_id, questionpaper_id=None):
         question_paper.save()
     random_sets = question_paper.random_questions.all()
     fixed_questions = question_paper.get_ordered_questions()
-    context = {'qpaper_form': qpaper_form, 'filter_form': filter_form, 'qpaper':
-            question_paper, 'questions': questions, 'fixed_questions': fixed_questions,
-            'state': state, 'random_sets': random_sets}
+    context = {'qpaper_form': qpaper_form, 'filter_form': filter_form,
+               'qpaper': question_paper, 'questions': questions, 'fixed_questions': fixed_questions,
+               'state': state, 'random_sets': random_sets}
     return my_render_to_response(request, 'yaksh/design_questionpaper.html', context,
-            context_instance=RequestContext(request))
+                                 context_instance=RequestContext(request))
 
 
 @login_required
@@ -997,6 +984,7 @@ def show_all_questions(request):
     return my_render_to_response(request, 'yaksh/showquestions.html', context,
                                  context_instance=ci)
 
+
 @login_required
 @email_verified
 def user_data(request, user_id, questionpaper_id=None):
@@ -1010,6 +998,7 @@ def user_data(request, user_id, questionpaper_id=None):
     context = {'data': data}
     return my_render_to_response(request, 'yaksh/user_data.html', context,
                                  context_instance=RequestContext(request))
+
 
 @login_required
 @email_verified
@@ -1057,6 +1046,7 @@ def download_csv(request, questionpaper_id):
         writer.writerow(row)
     return response
 
+
 @login_required
 @email_verified
 def grade_user(request, quiz_id=None, user_id=None, attempt_number=None):
@@ -1084,9 +1074,9 @@ def grade_user(request, quiz_id=None, user_id=None, attempt_number=None):
         has_quiz_assignments = AssignmentUpload.objects.filter(
                                 question_paper_id=questionpaper_id
                                 ).exists()
-        context = {"users": user_details, "quiz_id": quiz_id, "quiz":quiz,
-                    "has_quiz_assignments": has_quiz_assignments
-                    }
+        context = {"users": user_details, "quiz_id": quiz_id, "quiz": quiz,
+                   "has_quiz_assignments": has_quiz_assignments
+                   }
         if user_id is not None:
 
             attempts = AnswerPaper.objects.get_user_all_attempts\
@@ -1105,10 +1095,10 @@ def grade_user(request, quiz_id=None, user_id=None, attempt_number=None):
                                                      attempt_number
                                                     )
             context = {'data': data, "quiz_id": quiz_id, "users": user_details,
-                    "attempts": attempts, "user_id": user_id,
-                    "has_user_assignments": has_user_assignments,
-                    "has_quiz_assignments": has_quiz_assignments
-                    }
+                       "attempts": attempts, "user_id": user_id,
+                       "has_user_assignments": has_user_assignments,
+                       "has_quiz_assignments": has_quiz_assignments
+                       }
     if request.method == "POST":
         papers = data['papers']
         for paper in papers:
@@ -1122,10 +1112,7 @@ def grade_user(request, quiz_id=None, user_id=None, attempt_number=None):
                 'comments_%d' % paper.question_paper.id, 'No comments')
             paper.save()
 
-
-    return my_render_to_response(request, 'yaksh/grade_user.html',
-                                context, context_instance=ci
-                                )
+    return my_render_to_response(request, 'yaksh/grade_user.html', context, context_instance=ci)
 
 
 @login_required
@@ -1147,8 +1134,7 @@ def view_profile(request):
         msg = True
         context['form'] = form
         context['msg'] = msg
-        return my_render_to_response(request, 'yaksh/editprofile.html', context,
-                                    context_instance=ci)
+        return my_render_to_response(request, 'yaksh/editprofile.html', context, context_instance=ci)
 
 
 @login_required
@@ -1177,17 +1163,14 @@ def edit_profile(request):
             form_data.user.last_name = request.POST['last_name']
             form_data.user.save()
             form_data.save()
-            return my_render_to_response(request, 'yaksh/profile_updated.html',
-                                        context_instance=ci)
+            return my_render_to_response(request, 'yaksh/profile_updated.html', context_instance=ci)
         else:
             context['form'] = form
-            return my_render_to_response(request, 'yaksh/editprofile.html', context,
-                                        context_instance=ci)
+            return my_render_to_response(request, 'yaksh/editprofile.html', context, context_instance=ci)
     else:
         form = ProfileForm(user=user, instance=profile)
         context['form'] = form
-        return my_render_to_response(request, 'yaksh/editprofile.html', context,
-                                    context_instance=ci)
+        return my_render_to_response(request, 'yaksh/editprofile.html', context, context_instance=ci)
 
 
 @login_required
@@ -1210,10 +1193,10 @@ def search_teacher(request, course_id):
     if request.method == 'POST':
         u_name = request.POST.get('uname')
         if not len(u_name) == 0:
-            teachers = User.objects.filter(Q(username__icontains=u_name)|
-                Q(first_name__icontains=u_name)|Q(last_name__icontains=u_name)|
-                Q(email__icontains=u_name)).exclude(Q(id=user.id)|Q(is_superuser=1)|
-                                                    Q(id=course.creator.id))
+            teachers = User.objects.filter(Q(username__icontains=u_name) |
+                                           Q(first_name__icontains=u_name) | Q(last_name__icontains=u_name) |
+                                           Q(email__icontains=u_name)).exclude(Q(id=user.id) | Q(is_superuser=1) |
+                                                                               Q(id=course.creator.id))
             context['success'] = True
             context['teachers'] = teachers
     return my_render_to_response(request, 'yaksh/addteacher.html', context,
@@ -1245,8 +1228,7 @@ def add_teacher(request, course_id):
         course.add_teachers(*teachers)
         context['status'] = True
         context['teachers_added'] = teachers
-    return my_render_to_response(request, 'yaksh/addteacher.html', context,
-                                    context_instance=ci)
+    return my_render_to_response(request, 'yaksh/addteacher.html', context, context_instance=ci)
 
 
 @login_required
@@ -1305,7 +1287,7 @@ def view_answerpaper(request, questionpaper_id):
     if quiz.view_answerpaper and user in quiz.course.students.all():
         data = AnswerPaper.objects.get_user_data(user, questionpaper_id)
         has_user_assignment = AssignmentUpload.objects.filter(user=user,
-                                    question_paper_id=questionpaper_id).exists()
+                                                              question_paper_id=questionpaper_id).exists()
         context = {'data': data, 'quiz': quiz,
                    "has_user_assignment":has_user_assignment}
         return my_render_to_response(request, 'yaksh/view_answerpaper.html', context)
@@ -1358,13 +1340,14 @@ def regrade(request, course_id, question_id=None, answerpaper_id=None, questionp
             details.append(answerpaper.regrade(question.id))
     if questionpaper_id is not None and question_id is not None:
         answerpapers = AnswerPaper.objects.filter(questions=question_id,
-                question_paper_id=questionpaper_id)
+                                                  question_paper_id=questionpaper_id)
         for answerpaper in answerpapers:
             details.append(answerpaper.regrade(question_id))
     if answerpaper_id is not None and question_id is not None:
         answerpaper = get_object_or_404(AnswerPaper, pk=answerpaper_id)
         details.append(answerpaper.regrade(question_id))
     return grader(request, extra_context={'details': details})
+
 
 @login_required
 @email_verified
@@ -1377,7 +1360,7 @@ def download_course_csv(request, course_id):
         raise Http404('The question paper does not belong to your course')
     students = course.get_only_students().annotate(roll_number=F('profile__roll_number'),
                                                    institute=F('profile__institute')
-                                                    )\
+                                                   )\
                                          .values("id", "first_name", "last_name",
                                                  "email","institute",
                                                  "roll_number"
@@ -1391,23 +1374,22 @@ def download_course_csv(request, course_id):
             quiz_best_marks = AnswerPaper.objects.get_user_best_of_attempts_marks\
                                (quiz, student["id"])
             user_course_marks += quiz_best_marks
-            total_course_marks += quiz.questionpaper_set.values_list\
-                                    ("total_marks", flat=True)[0]
+            total_course_marks += quiz.questionpaper_set.values_list("total_marks", flat=True)[0]
             student["{}".format(quiz.description)] = quiz_best_marks
         student["total_scored"] = user_course_marks
         student["out_of"] = total_course_marks
-        
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="{0}.csv"'.format(
-                                      (course.name).lower().replace('.', ''))
-    header = ['first_name', 'last_name', "roll_number","email", "institute"]\
-            +[quiz.description for quiz in quizzes] + ['total_scored', 'out_of']
+                                      course.name.lower().replace('.', ''))
+    header = ['first_name', 'last_name', "roll_number","email", "institute"] + \
+             [quiz.description for quiz in quizzes] + ['total_scored', 'out_of']
     writer = csv.DictWriter(response,fieldnames=header, extrasaction='ignore')
     writer.writeheader()
     for student in students:
         writer.writerow(student)
     return response
+
 
 def activate_user(request, key):
     ci = RequestContext(request)
@@ -1417,7 +1399,7 @@ def activate_user(request, key):
     if profile.is_email_verified:
         context['activation_msg'] = "Your account is already verified"
         return my_render_to_response(request, 'yaksh/activation_status.html', context,
-                                context_instance=ci)
+                                     context_instance=ci)
 
     if timezone.now() > profile.key_expiry_time:
         context['msg'] = dedent("""
@@ -1430,7 +1412,8 @@ def activate_user(request, key):
         profile.save()
         context['msg'] = "Your account is activated"
     return my_render_to_response(request, 'yaksh/activation_status.html', context,
-                                context_instance=ci)
+                                 context_instance=ci)
+
 
 def new_activation(request, email=None):
     ci = RequestContext(request)
@@ -1444,18 +1427,17 @@ def new_activation(request, email=None):
         context['email_err_msg'] = "Multiple entries found for this email"\
                                     "Please change your email"
         return my_render_to_response(request, 'yaksh/activation_status.html', context,
-                                context_instance=ci)
+                                     context_instance=ci)
     except ObjectDoesNotExist:
         context['success'] = False
         context['msg'] = "Your account is not verified. \
                             Please verify your account"
         return render_to_response('yaksh/activation_status.html',
-                                    context, context_instance=ci)
+                                  context)
 
     if not user.profile.is_email_verified:
         user.profile.activation_key = generate_activation_key(user.username)
-        user.profile.key_expiry_time = timezone.now() + \
-                                timezone.timedelta(minutes=20)
+        user.profile.key_expiry_time = timezone.now() + timezone.timedelta(minutes=20)
         user.profile.save()
         new_user_data = User.objects.get(email=email)
         success, msg = send_user_mail(new_user_data.email,
@@ -1469,7 +1451,8 @@ def new_activation(request, email=None):
         context['activation_msg'] = "Your account is already verified"
 
     return my_render_to_response(request, 'yaksh/activation_status.html', context,
-                                context_instance=ci)
+                                 context_instance=ci)
+
 
 def update_email(request):
     context = {}
@@ -1484,7 +1467,8 @@ def update_email(request):
     else:
         context['email_err_msg'] = "Please Update your email"
         return my_render_to_response(request, 'yaksh/activation_status.html', context,
-                                context_instance=ci)
+                                     context_instance=ci)
+
 
 @login_required
 @email_verified
@@ -1493,10 +1477,7 @@ def download_assignment_file(request, quiz_id, question_id=None, user_id=None):
     if not is_moderator(user):
         raise Http404("You are not allowed to view this page")
     qp = QuestionPaper.objects.get(quiz_id=quiz_id)
-    assignment_files, file_name = AssignmentUpload.objects.get_assignments(qp,
-                                    question_id,
-                                    user_id
-                                    )
+    assignment_files, file_name = AssignmentUpload.objects.get_assignments(qp, question_id, user_id)
     zipfile_name = string_io()
     zip_file = zipfile.ZipFile(zipfile_name, "w")
     for f_name in assignment_files:
@@ -1505,8 +1486,7 @@ def download_assignment_file(request, quiz_id, question_id=None, user_id=None):
         folder_name = os.sep.join((folder, sub_folder, os.path.basename(
                         f_name.assignmentFile.name))
                         )
-        zip_file.write(f_name.assignmentFile.path, folder_name
-                    )
+        zip_file.write(f_name.assignmentFile.path, folder_name)
     zip_file.close()
     zipfile_name.seek(0)
     response = HttpResponse(content_type='application/zip')
@@ -1515,6 +1495,7 @@ def download_assignment_file(request, quiz_id, question_id=None, user_id=None):
                                             )
     response.write(zipfile_name.read())
     return response
+
 
 @login_required
 @email_verified
