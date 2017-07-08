@@ -14,8 +14,7 @@ urlpatterns = [
     url(r'^', include('account.urls')),
     url(r'^password/', include('password.urls')),
     url(r'^', include('experiment.urls')),
-    url(r'^', include('custom_admin.urls')),
-    url(r'^', include('social.apps.django_app.urls', namespace='social')),
+    url(r'^custom_admin/', include('custom_admin.urls')),
 ]
 
 handler404 = 'pages.views.e404'

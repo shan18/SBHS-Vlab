@@ -65,7 +65,6 @@ INSTALLED_APPS = (
     'undelete',
     'yaksh',
     'taggit',
-    'social.apps.django_app.default',
 
     'account',
     'custom_admin',
