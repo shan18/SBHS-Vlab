@@ -15,7 +15,6 @@ from sbhs_server.tables.models import Account
 from sbhs_server.tables.models import Experiment
 from sbhs_server import settings
 from sbhs_server import sbhs
-from sbhs_formula.formula import Formula
 
 
 class StaticData:
@@ -52,15 +51,8 @@ def initiation(req):
             e.log = os.path.join(log_dir, filename)
             e.save()
 
-            # Equal to the total number of rows in sbhs_formula/constants.txt
-            total_number_of_predefined_models = Formula.count_coeff()
-
-            user.coeff_ID = user.id % total_number_of_predefined_models
-
             boards = sbhs.Sbhs(user.coeff_ID)
             global boards
-
-            # e.coeff_ID = boards.getID()
 
             STATUS = 1
             MESSAGE = filename
@@ -139,7 +131,7 @@ def client_version(req):
 def logs(req):
     experiments = Experiment.objects.select_related().filter(user_id=req.user.id)
     for e in experiments:
-        e.log_name = e.log.split("\\")[-1]
+        e.log_name = str(e.log).split('/')[-1]
     return render(req, "experiment/logs.html", {"experiments": reversed(experiments)})
 
 
