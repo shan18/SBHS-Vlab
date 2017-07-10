@@ -32,3 +32,14 @@ python manage.py migrate
 ```
 
 + Run the server with `python manage.py` runserver. Open **localhost:8000** in your browser.
+
+
+### Instructions for creating a superuser
++ Open **sbhs_server/tables/models.py**. Go to **create_superuser()** function in class **UserManager**.  
+Set the value of the **email** parameter with your desired email address.
+
++ Now create the superuser with the following command
+```bash
+python manage.py createsuperuser
+```
+Then enter the username and the password.
