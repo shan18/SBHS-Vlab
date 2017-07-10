@@ -3,9 +3,11 @@ from undelete.models import TrashableMixin
 from sbhs_server.helpers import mailer
 from sbhs_server.helpers import simple_encrypt
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+
 from sbhs_server import settings
-# from yaksh.models import Profile
-# Create your models here.
+from sbhs_formula.formula import Formula
+
+import random
 
 
 class UserManager(BaseUserManager):
@@ -57,7 +59,8 @@ class Account(TrashableMixin, AbstractBaseUser, PermissionsMixin):
     is_admin = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
-    coeff_ID = models.IntegerField(default=0)
+    # Model version assigned to a user
+    coeff_ID = models.IntegerField(default=random.randint(1, Formula.count_coeff()))
 
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
@@ -73,7 +76,7 @@ class Account(TrashableMixin, AbstractBaseUser, PermissionsMixin):
         return self.name
 
     def send_confirmation(self):
-        message = """Hi,\n\nPlease visit the link """ + settings.BASE_URL +  """account/confirm/"""
+        message = """Hi,\n\nPlease visit the link """ + settings.BASE_URL + """account/confirm/"""
         message = message + self.confirmation_token()
         message = message + """ to confirm your account.\n\n\nRegards,\nVlabs Team"""
         mailer.email(self.email, "Please confirm your account", message)
@@ -116,7 +119,9 @@ class Experiment(TrashableMixin):
 
     log = models.CharField(max_length=255)
     checksum = models.CharField(max_length=255, default="NONE")
-    # coeff_ID = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
+
+    def __unicode__(self):
+        return self.log

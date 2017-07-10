@@ -1,3 +1,4 @@
-1	2
-2	1
+Contains model coefficients: 1st col- K, 2nd col- tau
+1   1
+0.3	60
 0.3	60
