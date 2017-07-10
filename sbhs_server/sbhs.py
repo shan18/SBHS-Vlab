@@ -27,7 +27,6 @@ class Sbhs:
         self.status = 0
         self.heat = 0
         self.fan = 0
-        self.temp = random.uniform(25.0, 27.0)
         self.formula = Formula(coeff_ID)
         
     def set_heat(self, val):
@@ -47,9 +46,9 @@ class Sbhs:
         self.fan = val
         return True
 
-    def get_temp(self, instantaneous_time):
+    def get_temp(self, instantaneous_time, room_temp):
         """ Get the temperature """
-        return round(self.formula.get_temp(self.heat, self.fan, instantaneous_time) + self.temp, 2)
+        return round(self.formula.get_temp(self.heat, self.fan, instantaneous_time) + room_temp, 2)
 
     def get_heat(self):
         return self.heat

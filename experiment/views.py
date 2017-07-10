@@ -9,15 +9,18 @@ import json
 import datetime
 import os
 import time
+import random
 
 from sbhs_server.tables.models import Account
 from sbhs_server.tables.models import Experiment
 from sbhs_server import settings
 from sbhs_server import sbhs
+from sbhs_formula.formula import Formula
 
 
-class InstantaneousTime:
+class StaticData:
     instantaneous_time = 0
+    room_temp = 0
 
 
 def check_connection(req):
@@ -40,15 +43,19 @@ def initiation(req):
             f = open(os.path.join(log_dir, filename), "a")
             f.close()
 
-            InstantaneousTime.instantaneous_time = 0
+            StaticData.instantaneous_time = 0
+            StaticData.room_temp = random.uniform(25.0, 27.0)
 
             LOGIN(req, user)
             e = Experiment()
             e.user = user
-            e.log=os.path.join(log_dir, filename)
+            e.log = os.path.join(log_dir, filename)
             e.save()
 
-            user.coeff_ID = user.id % 3
+            # Equal to the total number of rows in sbhs_formula/constants.txt
+            total_number_of_predefined_models = Formula.count_coeff()
+
+            user.coeff_ID = user.id % total_number_of_predefined_models
 
             boards = sbhs.Sbhs(user.coeff_ID)
             global boards
@@ -85,8 +92,8 @@ def experiment(req):
         boards.set_heat(heat)
         boards.set_fan(fan)
         
-        temperature = boards.get_temp(InstantaneousTime.instantaneous_time)
-        InstantaneousTime.instantaneous_time += 1
+        temperature = boards.get_temp(StaticData.instantaneous_time, StaticData.room_temp)
+        StaticData.instantaneous_time += 1
         
         log_data(boards, user.coeff_ID, heat=heat, fan=fan, temp=temperature)
         

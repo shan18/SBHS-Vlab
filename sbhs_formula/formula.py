@@ -3,8 +3,11 @@ import math
 import os
 
 
+# In constants.txt
+# First column: K
+# Second column: tow
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
-x = os.path.join(BASE_DIR, 'coeff_1st_order.txt')
+x = os.path.join(BASE_DIR, 'constants.txt')
 
 
 class Formula:
@@ -19,7 +22,7 @@ class Formula:
         """ Add required Formula here """
         k = self.coeff[0]
 
-        """ 2nd Order Model
+        """ 2nd Order Model  (Update the constants.txt file accordingly)
         tow_1 = self.coeff[1]
         tow_2 = self.coeff[2]
         exp_power_1 = -1 * (instantaneous_time / tow_1)
@@ -46,6 +49,6 @@ class Formula:
     @staticmethod
     def count_coeff():
         """ This method counts the number of Coefficient Sets available"""
-        with open(x,'r') as f:
+        with open(x, 'r') as f:
             lines = f.readlines()
         return len(lines)
