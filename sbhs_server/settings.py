@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
 import socket
+import credentials
 
 hostname = socket.gethostname()
 is_production = hostname == "vlabs-Veriton-Series"
@@ -23,7 +24,7 @@ OUTPUT_DIR = os.path.join(BASE_DIR, 'output')
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'skjndcijuwhfjc_cnjwcuwuhcnje490fu=@f('
+SECRET_KEY = credentials.PROJECT_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not is_production
@@ -97,11 +98,11 @@ if is_production:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'db_name',
-            'USER': 'username',
-            'PASSWORD': 'password',
-            'HOST': 'localhost',
-            'PORT': '3306',
+            'NAME': credentials.DB_NAME,
+            'USER': credentials.DB_USER,
+            'PASSWORD': credentials.DB_PASS,
+            'HOST': credentials.DB_HOST,
+            'PORT': credentials.DB_PORT,
         }
     }
 else:
@@ -128,7 +129,7 @@ USE_TZ = True
 AUTH_USER_MODEL = 'tables.Account'
 LOGIN_URL = '/enter'
 LOGIN_REDIRECT_URL = '/sbhs/'
-LOGOUT_URL = '/sbhs/logout'
+LOGOUT_URL = '/logout'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_NAME = "pfesgbxra"
 SESSION_COOKIE_NAME = "frffvbaVq"
@@ -141,8 +142,9 @@ EMAIL_USE_TLS = False
 
 EMAIL_HOST = 'smtp-auth.iitb.ac.in'
 EMAIL_PORT = 25
-EMAIL_HOST_USER = "username"
-EMAIL_HOST_PASSWORD = "password"
+EMAIL_HOST_USER = credentials.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = credentials.EMAIL_HOST_PASSWORD
+ADMIN_EMAIL = credentials.ADMIN_EMAIL
 
 # Set EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend' in production
 EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
