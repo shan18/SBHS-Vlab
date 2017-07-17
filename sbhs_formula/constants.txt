@@ -1,4 +1,4 @@
-Contains model coefficients: 1st col- kp_heat, 2nd col- tau
+See formula.py for column titles
 0.3931 20 60 -0.02896 10 20
 0.2 2 50 0.1 1 40
 0.3 10 30 0.2 5 50
