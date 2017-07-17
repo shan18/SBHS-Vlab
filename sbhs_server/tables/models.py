@@ -34,7 +34,7 @@ class UserManager(BaseUserManager):
         birth and password.
         """
         user = self.create_user(
-            email='django_admin@sbhs.com',
+            email='rupakrokade@gmail.com',
             username=username,
             password=password,
         )

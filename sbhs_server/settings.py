@@ -9,10 +9,10 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
 import socket
-import credentials
+import sbhs_server.credentials as credentials
 
 hostname = socket.gethostname()
-is_production = hostname == "vlabs-Veriton-Series"
+is_production = hostname == "vlabsserver"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
@@ -128,7 +128,7 @@ USE_TZ = True
 
 AUTH_USER_MODEL = 'tables.Account'
 LOGIN_URL = '/enter'
-LOGIN_REDIRECT_URL = '/sbhs/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_URL = '/logout'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_NAME = "pfesgbxra"
@@ -144,7 +144,6 @@ EMAIL_HOST = 'smtp-auth.iitb.ac.in'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = credentials.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = credentials.EMAIL_HOST_PASSWORD
-ADMIN_EMAIL = credentials.ADMIN_EMAIL
 
 # Set EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend' in production
 EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
@@ -175,8 +174,8 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 if is_production:
-    BASE_URL = "http://vlabs.iitb.ac.in/sbhs/"
-    FORCE_SCRIPT_NAME = "/sbhs"
+    BASE_URL = "http://vlabs.iitb.ac.in/"
+    FORCE_SCRIPT_NAME = "/"
     USE_X_FORWARDED_HOST = True
 else:
     BASE_URL = "http://127.0.0.1:8000/"
