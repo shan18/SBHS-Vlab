@@ -16,10 +16,7 @@ from sbhs_server.tables.models import Experiment
 from sbhs_server import settings
 from sbhs_server import sbhs
 
-
-class StaticData:
-    instantaneous_time = 0
-    room_temp = 0
+from global_values import GlobalValues
 
 
 def check_connection(req):
@@ -42,8 +39,19 @@ def initiation(req):
             f = open(os.path.join(log_dir, filename), "a")
             f.close()
 
-            StaticData.instantaneous_time = 0
-            StaticData.room_temp = random.uniform(25.0, 27.0)
+            """ Initialize Global Values """
+            GlobalValues.instantaneous_time = 0
+            GlobalValues.room_temp = 29 + random.uniform(-2, 2)
+            GlobalValues.max_temp = 68 + random.uniform(-0.3, 0.3)
+
+            # Add randomness to constants
+            GlobalValues.kp_heat = random.uniform(-0.1, 0.1)
+            GlobalValues.tau1_heat = random.uniform(-3, 3)
+            GlobalValues.tau2_heat = random.uniform(-3, 3)
+
+            GlobalValues.kp_fan = random.uniform(-0.1, 0.1)
+            GlobalValues.tau1_fan = random.uniform(-3, 3)
+            GlobalValues.tau2_fan = random.uniform(-3, 3)
 
             LOGIN(req, user)
             e = Experiment()
@@ -83,16 +91,50 @@ def experiment(req):
 
         boards.set_heat(heat)
         boards.set_fan(fan)
-        
-        temperature = boards.get_temp(StaticData.instantaneous_time, StaticData.room_temp)
-        StaticData.instantaneous_time += 1
+
+        # scaling heat
+        scaled_heat = int((heat * 50) / 100)
+
+        delta_heat = 0
+        neg_heat = 1
+        delta_fan = 0
+        neg_fan = 1
+        if GlobalValues.instantaneous_time > 0:
+            delta_heat = scaled_heat - GlobalValues.heat_old
+            delta_fan = fan - GlobalValues.fan_old
+
+        if delta_heat != 0:
+            GlobalValues.flag_heat = 1
+            if delta_heat < 0:
+                neg_heat = -1
+            else:
+                neg_heat = 1
+        else:
+            GlobalValues.flag_heat = 0
+
+        if delta_fan != 0:
+            GlobalValues.flag_fan = 1
+            if delta_fan < 0:
+                neg_fan = -1
+            else:
+                neg_fan = 1
+        else:
+            GlobalValues.flag_fan = 0
+
+        temperature = boards.get_temp(
+            neg_heat * scaled_heat,
+            neg_fan * fan
+        )
+        GlobalValues.instantaneous_time += 1
+        GlobalValues.heat_old = scaled_heat
+        GlobalValues.fan_old = fan
         
         log_data(boards, user.coeff_ID, heat=heat, fan=fan, temp=temperature)
         
         server_end_ts = int(time.time() * 1000)
         timeleft = 5999
         STATUS = 1
-        MESSAGE = "%s %d %d %2.2f" % (req.POST.get("iteration"),
+        MESSAGE = "%s %d %d %2.2f" % (str(GlobalValues.instantaneous_time - 1),  # req.POST.get("iteration"),
                                       heat, fan, temperature)
         
         MESSAGE = "%s %s %d %d,%s,%d" % (MESSAGE,

@@ -3,7 +3,6 @@ from time import strftime
 
 import sys
 import os
-import random
 
 # The following line is needed to import Formula
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -46,9 +45,9 @@ class Sbhs:
         self.fan = val
         return True
 
-    def get_temp(self, instantaneous_time, room_temp):
+    def get_temp(self, u_heat, u_fan):
         """ Get the temperature """
-        return round(self.formula.get_temp(self.heat, self.fan, instantaneous_time) + room_temp, 2)
+        return self.formula.get_temp(u_heat, u_fan)
 
     def get_heat(self):
         return self.heat
@@ -62,7 +61,7 @@ class Sbhs:
 
     def log(self, msg, level):
         try:
-            err_file = open(LOG_FILE, 'a') # open error log file in append mode
+            err_file = open(LOG_FILE, 'a')  # open error log file in append mode
             if not err_file:
                 return
             log_msg = '%s %s %s\n' %(level, strftime('%d:%m:%Y %H:%M:%S', localtime()), msg)
