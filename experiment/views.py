@@ -44,15 +44,6 @@ def initiation(req):
             GlobalValues.room_temp = 29 + random.uniform(-2, 2)
             GlobalValues.max_temp = 68 + random.uniform(-0.3, 0.3)
 
-            # Add randomness to constants
-            GlobalValues.kp_heat = random.uniform(-0.1, 0.1)
-            GlobalValues.tau1_heat = random.uniform(-3, 3)
-            GlobalValues.tau2_heat = random.uniform(-3, 3)
-
-            GlobalValues.kp_fan = random.uniform(-0.1, 0.1)
-            GlobalValues.tau1_fan = random.uniform(-3, 3)
-            GlobalValues.tau2_fan = random.uniform(-3, 3)
-
             LOGIN(req, user)
             e = Experiment()
             e.user = user
