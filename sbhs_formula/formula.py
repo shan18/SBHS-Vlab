@@ -26,16 +26,16 @@ class Formula:
             lines = f.readlines()
         self.coeff = [float(c) for c in lines[i].split()]
 
-        GlobalValues.kp_heat = self.coeff[0]
-        GlobalValues.tau1_heat = self.coeff[1]
-        GlobalValues.tau2_heat = self.coeff[2]
+        GlobalValues.kp_heat += self.coeff[0]
+        GlobalValues.tau1_heat += self.coeff[1]
+        GlobalValues.tau2_heat += self.coeff[2]
 
         if GlobalValues.tau1_heat == GlobalValues.tau2_heat:
             GlobalValues.tau1_heat += 5
 
-        GlobalValues.kp_fan = self.coeff[3]
-        GlobalValues.tau1_fan = self.coeff[4]
-        GlobalValues.tau2_fan = self.coeff[5]
+        GlobalValues.kp_fan += self.coeff[3]
+        GlobalValues.tau1_fan += self.coeff[4]
+        GlobalValues.tau2_fan += self.coeff[5]
 
         if GlobalValues.tau1_fan == GlobalValues.tau2_fan:
             GlobalValues.tau1_fan += 5
