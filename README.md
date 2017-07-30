@@ -78,4 +78,21 @@ Set the value of the **email** parameter with your desired email address.
 ```bash
 python manage.py createsuperuser
 ```
-Then enter the username and the password.
+Then enter the username and the password.  
+
+
+### Instructions for creating a user when hosting in localhost
+When running the server in **localhost**, no email verification link will be sent to the user. The user has to be
+manually verified by setting the corresponding **is_active** column of the table **tables_account** to 1 in the database.
++ Open the registration page, fill up the form and click on ***Create Account***
+
++ Login as root user in mysql
+```bash
+mysql -u <root_username> -p
+```
+
++ Select the database **sbhs** and set the **is_active** entry of the corresponding user in **tables_account** to 1.
+```sql
+use sbhs;
+update tables_account set is_active=1 where id=<user_id>;
+```
