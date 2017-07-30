@@ -42,7 +42,7 @@ class Formula:
             GlobalValues.tau1_fan += 5
 
     @staticmethod
-    def get_temp(heat, fan):
+    def calc_temp(heat, fan):
         """ Add required Formula here """
 
         # Effect of heat

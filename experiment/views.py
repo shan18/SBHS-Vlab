@@ -187,7 +187,7 @@ def log_data(sbhs, coeff_id, heat=None, fan=None, temp=None):
     if fan is None:
         fan = sbhs.get_fan()
     if temp is None:
-        temp = sbhs.get_temp()
+        temp = sbhs.calc_temp()
 
     data = "%d %s %s %s\n" % (int(time.time()), str(heat), str(fan), str(temp))
     f.write(data)
